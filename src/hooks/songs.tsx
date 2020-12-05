@@ -3,7 +3,7 @@ import { PERMISSIONS, request } from 'react-native-permissions';
 import MusicFiles from 'react-native-get-music-files';
 import AsyncStorage from '@react-native-community/async-storage';
 import { NativeEventEmitter, NativeModules } from 'react-native';
-
+import TrackPlayer from 'react-native-track-player';
 interface MusicFile{
   id : number,
   title : string,
@@ -19,6 +19,7 @@ interface MusicFile{
 interface SongContextData {
   refresh(): void;
   songList: MusicFile[];
+  playSong(song: MusicFile): void;
 }
 
 const { RNReactNativeGetMusicFiles } = NativeModules;
@@ -81,8 +82,22 @@ const SongProvider: React.FC = ({ children }) => {
     });
   }, []);
 
+  const playSong = useCallback((song: MusicFile): void => {
+    TrackPlayer.setupPlayer().then(async () => {
+      await TrackPlayer.add({
+          id: String(song.id),
+          url: song.path,
+          title: song.title,
+          artist: song.author,
+          artwork: song.cover,
+      });
+      
+      TrackPlayer.play();
+  });
+  }, [TrackPlayer]);
+
   return (
-    <SongContext.Provider value={{ songList, refresh }}>
+    <SongContext.Provider value={{ songList, refresh, playSong }}>
       {children}
     </SongContext.Provider>
   );

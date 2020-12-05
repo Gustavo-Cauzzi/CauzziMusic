@@ -1,3 +1,4 @@
+import Icon from 'react-native-vector-icons';
 import styled from 'styled-components/native';
 
 export const Container = styled.View`
@@ -24,3 +25,8 @@ export const ArtistName = styled.Text`
   color: #a5a5a5;
   font-size: 15px;
 `;
+
+export const IconContainer = styled.View`
+  flex-direction: row;
+`;
+

@@ -23,19 +23,25 @@ interface SongListProps {
 }
 
 const SongList: React.FC<SongListProps> = ({ navigation }) => {
-  const {songList} = useSongs();
+  const {songList, playSong} = useSongs();
 
   const handleOpenDrawerMenu = useCallback(() => {
     navigation.openDrawer()
   }, [navigation]);
 
-  const handlePlayMusic = useCallback(({id, title, path, author, cover}: MusicFile) => {
+  const handlePlayMusic = useCallback((song: MusicFile) => {
+    playSong(song);
+
+    const {id, title, path, author, cover, duration, album} = song;
+    
     navigation.jumpTo('Player', {
       id,
       title,
       path,
       author,
       cover,
+      duration,
+      album,
     })
   }, []);
 
