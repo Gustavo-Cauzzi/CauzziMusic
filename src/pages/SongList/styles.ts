@@ -56,3 +56,13 @@ export const ArtistName = styled.Text`
   color: #a5a5a5;
   font-size: 12px;
 `;
+
+export const SongAlbumCoverPlaceHolder = styled.View`
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  background-color: #333;
+`;

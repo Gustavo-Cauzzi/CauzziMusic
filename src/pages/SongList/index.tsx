@@ -1,11 +1,12 @@
-import React, { useCallback } from 'react';
-import { FlatList, Text } from 'react-native';
-import { RectButton } from 'react-native-gesture-handler';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { FlatList, FlatListProps } from 'react-native';
 import { useSongs } from '../../hooks/songs';
-import Icon from 'react-native-vector-icons/Feather';
+import IconFeather from 'react-native-vector-icons/Feather';
+import IconFontisto from 'react-native-vector-icons/Fontisto';
 
-import {ArtistName, Container, Content, Header, MenuButton, SongAlbumCover, SongContainer, SongInfo, SongName, Title} from './styles';
+import {ArtistName, Container, Content, Header, MenuButton, SongAlbumCover, SongContainer, SongInfo, SongName, Title, SongAlbumCoverPlaceHolder} from './styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { stop } from 'react-native-track-player';
 interface MusicFile{
   id : number,
   title : string,
@@ -30,7 +31,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
   }, [navigation]);
 
   const handlePlayMusic = useCallback((song: MusicFile) => {
-    playSong(song);
+    playSong(song);    
 
     const {id, title, path, author, cover, duration, album} = song;
     
@@ -49,18 +50,29 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
     <Container>
       <Header>
         <MenuButton onPress={handleOpenDrawerMenu}>
-          <Icon name="menu" size={25} color="#FFF"/>
+          <IconFeather name="menu" size={25} color="#FFF"/>
         </MenuButton>
         <Title>Lista de Músicas</Title>
       </Header>
       <Content>
         <SafeAreaView>
         <FlatList
-          data = {songList}
-          keyExtractor = {(song) => String(song.id)}
-          renderItem = {({item: song}) => (
+          data={songList}
+          maxToRenderPerBatch={100}
+          keyExtractor={(song) => String(song.id)}
+          getItemLayout={(_, index) => (
+            { length: 70, offset: 70 * index, index }
+          )}
+          renderItem={({item: song}) => (
             <SongContainer key={song.id} onPress={() => {handlePlayMusic(song)}}>
-              <SongAlbumCover source={{uri: `${song.cover}`}}/>
+              {song.cover 
+                ? <SongAlbumCover source={{uri: `${song.cover}`}}/>
+                : (
+                  <SongAlbumCoverPlaceHolder>
+                    <IconFontisto name="music-note" color="#fff" size={20}/>    
+                  </SongAlbumCoverPlaceHolder>
+                )
+              }
               <SongInfo>
                 <SongName>{song.title}</SongName>
                 <ArtistName>{song.author}</ArtistName>

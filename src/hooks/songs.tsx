@@ -20,6 +20,7 @@ interface SongContextData {
   refresh(): void;
   songList: MusicFile[];
   playSong(song: MusicFile): void;
+  pauseSong(): void;
 }
 
 const { RNReactNativeGetMusicFiles } = NativeModules;
@@ -41,8 +42,6 @@ const SongProvider: React.FC = ({ children }) => {
       }else{
         refresh();
       }
-
-      // setLoading(false);
     }
 
     loadDataFromStorage();
@@ -84,6 +83,20 @@ const SongProvider: React.FC = ({ children }) => {
 
   const playSong = useCallback((song: MusicFile): void => {
     TrackPlayer.setupPlayer().then(async () => {
+      TrackPlayer.updateOptions({
+        capabilities: [
+            TrackPlayer.CAPABILITY_PLAY,
+            TrackPlayer.CAPABILITY_PAUSE,
+            TrackPlayer.CAPABILITY_STOP
+        ],
+        notificationCapabilities: [
+            TrackPlayer.CAPABILITY_PLAY,
+            TrackPlayer.CAPABILITY_PAUSE,
+            TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
+            TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
+        ]
+    });
+
       await TrackPlayer.add({
           id: String(song.id),
           url: song.path,
@@ -95,9 +108,13 @@ const SongProvider: React.FC = ({ children }) => {
       TrackPlayer.play();
   });
   }, [TrackPlayer]);
+  
+  const pauseSong = useCallback(() => {
+    TrackPlayer.pause();
+  }, [TrackPlayer]);
 
   return (
-    <SongContext.Provider value={{ songList, refresh, playSong }}>
+    <SongContext.Provider value={{ songList, refresh, playSong, pauseSong }}>
       {children}
     </SongContext.Provider>
   );
