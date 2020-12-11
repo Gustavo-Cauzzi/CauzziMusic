@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { FlatList, FlatListProps } from 'react-native';
+import React, { useCallback } from 'react';
+import { FlatList } from 'react-native';
 import { useSongs } from '../../hooks/songs';
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
 
 import {ArtistName, Container, Content, Header, MenuButton, SongAlbumCover, SongContainer, SongInfo, SongName, Title, SongAlbumCoverPlaceHolder} from './styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { stop } from 'react-native-track-player';
 interface MusicFile{
   id : number,
   title : string,

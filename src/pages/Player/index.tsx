@@ -1,13 +1,13 @@
 import { useRoute } from '@react-navigation/native';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather'
 
-import TrackPlayer from 'react-native-track-player';
 import Slider from '@react-native-community/slider'
 
 import { AlbumCover, ArtistName, Container, IconContainer, SongTitle } from './styles';
-
+import { useSongs } from '../../hooks/songs';
+import { useState } from 'react';
 interface RouteParams{
   id: string;
   title: string;
@@ -20,8 +20,30 @@ interface RouteParams{
 
 const Player: React.FC = () => {
   const route = useRoute();
+  const [isPlaying, setIsPlaying] = useState(true)
+  const { TrackPlayer } = useSongs();
 
   const routeParams = route.params as RouteParams;
+
+  const handlePauseSong = useCallback(() => {
+    TrackPlayer.pause();
+    setIsPlaying(false);
+  }, []);
+
+  const handlePlaySong = useCallback(() => {
+    TrackPlayer.play();
+    setIsPlaying(true);
+  }, []);
+
+  const handleSkipFoward = useCallback(() => {
+    TrackPlayer.skipToNext();
+    setIsPlaying(true);
+  }, []);
+
+  const handleSkipBackwards = useCallback(() => {
+    TrackPlayer.skipToPrevious();
+    setIsPlaying(true);
+  }, []);
 
   return (
     <Container>
@@ -46,9 +68,14 @@ const Player: React.FC = () => {
               maximumTrackTintColor="#AAA"
             />
             <IconContainer>
-              <Icon name="skip-back" size={30} color="#fff" />
-              <Icon name="pause" size={30} color="#fff" style={{marginRight: 20, marginLeft: 20}}/>
-              <Icon name="skip-forward" size={30} color="#fff" />
+              <Icon name="skip-back" size={40} color="#fff" onPress={handleSkipBackwards}/>
+
+              {isPlaying 
+                ? <Icon name="pause" size={40} color="#fff" style={{marginRight: 55, marginLeft: 55}} onPress={handlePauseSong}/>
+                : <Icon name="play" size={40} color="#fff" style={{marginRight: 55, marginLeft: 55}} onPress={handlePlaySong}/>
+              }
+
+              <Icon name="skip-forward" size={40} color="#fff" onPress={handleSkipFoward}/>
             </IconContainer>
           </>
         )

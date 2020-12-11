@@ -20,7 +20,7 @@ interface SongContextData {
   refresh(): void;
   songList: MusicFile[];
   playSong(song: MusicFile): void;
-  pauseSong(): void;
+  TrackPlayer: any;
 }
 
 const { RNReactNativeGetMusicFiles } = NativeModules;
@@ -31,6 +31,7 @@ const SongContext = createContext<SongContextData>({} as SongContextData);
 
 const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
+  const [isRandomActivated, setIsRandomActivated] = useState(false);
   // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,13 +45,31 @@ const SongProvider: React.FC = ({ children }) => {
       }
     }
 
+    async function setupMusicPlayer(){
+      TrackPlayer.setupPlayer().then(async () => {
+        TrackPlayer.updateOptions({
+          capabilities: [
+              TrackPlayer.CAPABILITY_PLAY,
+              TrackPlayer.CAPABILITY_PAUSE,
+              TrackPlayer.CAPABILITY_STOP
+          ],
+          notificationCapabilities: [
+              TrackPlayer.CAPABILITY_PLAY,
+              TrackPlayer.CAPABILITY_PAUSE,
+              TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
+              TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
+          ],
+        });
+      })
+    }
+
+    setupMusicPlayer();
     loadDataFromStorage();
   }, []);
 
   const refresh = useCallback(() => {
     eventEmitter.addListener('onBatchReceived', (params) => {
       setSongList([params.batch]);
-      console.log(params.batch);
     });
 
     request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE).then((result) => {
@@ -81,40 +100,65 @@ const SongProvider: React.FC = ({ children }) => {
     });
   }, []);
 
-  const playSong = useCallback((song: MusicFile): void => {
-    TrackPlayer.setupPlayer().then(async () => {
-      TrackPlayer.updateOptions({
-        capabilities: [
-            TrackPlayer.CAPABILITY_PLAY,
-            TrackPlayer.CAPABILITY_PAUSE,
-            TrackPlayer.CAPABILITY_STOP
-        ],
-        notificationCapabilities: [
-            TrackPlayer.CAPABILITY_PLAY,
-            TrackPlayer.CAPABILITY_PAUSE,
-            TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
-            TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
-        ]
+  const playSong = useCallback(async (song: MusicFile): Promise<void> => {
+    await TrackPlayer.add({
+        id: String(song.id),
+        url: song.path,
+        title: song.title,
+        artist: song.author,
+        artwork: song.cover,
     });
+    
+    const trackPlayerState = await TrackPlayer.getState();
 
-      await TrackPlayer.add({
-          id: String(song.id),
-          url: song.path,
-          title: song.title,
-          artist: song.author,
-          artwork: song.cover,
-      });
-      
+    console.log("currentTrackPlayerState: ",trackPlayerState);
+
+    if(trackPlayerState != 2){
+      TrackPlayer.skipToNext();
+    }else{
       TrackPlayer.play();
-  });
-  }, [TrackPlayer]);
-  
-  const pauseSong = useCallback(() => {
-    TrackPlayer.pause();
-  }, [TrackPlayer]);
+
+      // if(isRandomActivated){
+      //   const indexCurrentSong = songList.findIndex(s => s.id === song.id);
+
+      //   songList.map(async (s, index) => {
+      //     if(index <= indexCurrentSong) return;
+      //     await TrackPlayer.add({
+      //       id: String(s.id),
+      //       url: s.path,
+      //       title: s.title,
+      //       artist: s.author,
+      //       artwork: s.cover,
+      //     });
+      //   })
+      //   const queue = await TrackPlayer.getQueue();
+      //   console.log("queue: ", queue)
+      // }else{
+      //   let numberOfSongsQueued = 1;
+      //   while(numberOfSongsQueued < songList.length){
+      //     const randomSongIndex = Math.random() * (songList.length - 1)
+      //     const currentQueue = await TrackPlayer.getQueue();
+      //     const randomSongAlreadyInQueue = currentQueue.some(s => s.id === String(songList[randomSongIndex].id))
+      //     if(!randomSongAlreadyInQueue){
+      //       await TrackPlayer.add({
+      //         id: String(songList[randomSongIndex].id),
+      //         url: songList[randomSongIndex].path,
+      //         title: songList[randomSongIndex].title,
+      //         artist: songList[randomSongIndex].author,
+      //         artwork: songList[randomSongIndex].cover,
+      //       }); 
+      //       numberOfSongsQueued++;           
+      //     }
+      //   }
+      //   const queue = await TrackPlayer.getQueue();
+      //   console.log("queue: ", queue);
+      // }
+    }
+  }, [TrackPlayer, songList]);
+
 
   return (
-    <SongContext.Provider value={{ songList, refresh, playSong, pauseSong }}>
+    <SongContext.Provider value={{ songList, refresh, playSong, TrackPlayer }}>
       {children}
     </SongContext.Provider>
   );
