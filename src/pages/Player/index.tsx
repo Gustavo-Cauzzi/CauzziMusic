@@ -1,5 +1,5 @@
 import { useRoute } from '@react-navigation/native';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather'
 
@@ -21,26 +21,33 @@ interface RouteParams{
 const Player: React.FC = () => {
   const route = useRoute();
   const [isPlaying, setIsPlaying] = useState(true)
-  const { TrackPlayer } = useSongs();
+  const { TrackPlayer, needToRefreshPauseButton, setNeedToRefreshPauseButton } = useSongs();
+
+  useEffect(() => {
+    if(needToRefreshPauseButton){
+      setIsPlaying(needToRefreshPauseButton);
+      setNeedToRefreshPauseButton(false);
+    }    
+  }, [needToRefreshPauseButton]);
 
   const routeParams = route.params as RouteParams;
 
-  const handlePauseSong = useCallback(() => {
+  const handlePauseSong = useCallback(async () => {
     TrackPlayer.pause();
     setIsPlaying(false);
   }, []);
 
-  const handlePlaySong = useCallback(() => {
+  const handlePlaySong = useCallback(async () => {
     TrackPlayer.play();
     setIsPlaying(true);
   }, []);
 
-  const handleSkipFoward = useCallback(() => {
+  const handleSkipFoward = useCallback(async () => {
     TrackPlayer.skipToNext();
     setIsPlaying(true);
   }, []);
 
-  const handleSkipBackwards = useCallback(() => {
+  const handleSkipBackwards = useCallback(async () => {
     TrackPlayer.skipToPrevious();
     setIsPlaying(true);
   }, []);

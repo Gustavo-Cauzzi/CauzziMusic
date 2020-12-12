@@ -21,6 +21,8 @@ interface SongContextData {
   songList: MusicFile[];
   playSong(song: MusicFile): void;
   TrackPlayer: any;
+  setNeedToRefreshPauseButton(value: boolean): void;
+  needToRefreshPauseButton: boolean;
 }
 
 const { RNReactNativeGetMusicFiles } = NativeModules;
@@ -31,7 +33,8 @@ const SongContext = createContext<SongContextData>({} as SongContextData);
 
 const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
-  const [isRandomActivated, setIsRandomActivated] = useState(false);
+  const [needToRefreshPauseButton, setNeedToRefreshPauseButton] = useState(false);
+  const [isTheFirstOne, setIsTheFirstOne] = useState(true);
   // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -108,57 +111,21 @@ const SongProvider: React.FC = ({ children }) => {
         artist: song.author,
         artwork: song.cover,
     });
-    
-    const trackPlayerState = await TrackPlayer.getState();
 
-    console.log("currentTrackPlayerState: ",trackPlayerState);
+    const currentTrack = await TrackPlayer.getCurrentTrack();
 
-    if(trackPlayerState != 2){
-      TrackPlayer.skipToNext();
+    if(!isTheFirstOne || currentTrack != String(song.id)){ 
+      TrackPlayer.skipToNext(); 
+      TrackPlayer.play(); 
+      setNeedToRefreshPauseButton(true);
     }else{
       TrackPlayer.play();
-
-      // if(isRandomActivated){
-      //   const indexCurrentSong = songList.findIndex(s => s.id === song.id);
-
-      //   songList.map(async (s, index) => {
-      //     if(index <= indexCurrentSong) return;
-      //     await TrackPlayer.add({
-      //       id: String(s.id),
-      //       url: s.path,
-      //       title: s.title,
-      //       artist: s.author,
-      //       artwork: s.cover,
-      //     });
-      //   })
-      //   const queue = await TrackPlayer.getQueue();
-      //   console.log("queue: ", queue)
-      // }else{
-      //   let numberOfSongsQueued = 1;
-      //   while(numberOfSongsQueued < songList.length){
-      //     const randomSongIndex = Math.random() * (songList.length - 1)
-      //     const currentQueue = await TrackPlayer.getQueue();
-      //     const randomSongAlreadyInQueue = currentQueue.some(s => s.id === String(songList[randomSongIndex].id))
-      //     if(!randomSongAlreadyInQueue){
-      //       await TrackPlayer.add({
-      //         id: String(songList[randomSongIndex].id),
-      //         url: songList[randomSongIndex].path,
-      //         title: songList[randomSongIndex].title,
-      //         artist: songList[randomSongIndex].author,
-      //         artwork: songList[randomSongIndex].cover,
-      //       }); 
-      //       numberOfSongsQueued++;           
-      //     }
-      //   }
-      //   const queue = await TrackPlayer.getQueue();
-      //   console.log("queue: ", queue);
-      // }
+      isTheFirstOne ? setIsTheFirstOne(false) : null
     }
-  }, [TrackPlayer, songList]);
-
-
+  }, [TrackPlayer]);
+  
   return (
-    <SongContext.Provider value={{ songList, refresh, playSong, TrackPlayer }}>
+    <SongContext.Provider value={{ songList, refresh, playSong, TrackPlayer, setNeedToRefreshPauseButton, needToRefreshPauseButton }}>
       {children}
     </SongContext.Provider>
   );
