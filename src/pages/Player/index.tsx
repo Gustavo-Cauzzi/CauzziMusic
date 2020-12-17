@@ -1,13 +1,14 @@
 import { useRoute } from '@react-navigation/native';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather'
 
-import Slider from '@react-native-community/slider'
+import Slider, { SliderRef } from '@react-native-community/slider'
 
 import { AlbumCover, ArtistName, Container, IconContainer, SongTitle } from './styles';
 import { useSongs } from '../../hooks/songs';
 import { useState } from 'react';
+import { useValue } from 'react-native-reanimated';
 interface RouteParams{
   id: string;
   title: string;
@@ -20,15 +21,27 @@ interface RouteParams{
 
 const Player: React.FC = () => {
   const route = useRoute();
-  const [isPlaying, setIsPlaying] = useState(true)
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [currentTrackPosition, setCurrentTrackPosition] = useState(0);
   const { TrackPlayer, needToRefreshPauseButton, setNeedToRefreshPauseButton } = useSongs();
-
+  let isUserSliding = false;
+  
   useEffect(() => {
     if(needToRefreshPauseButton){
       setIsPlaying(needToRefreshPauseButton);
       setNeedToRefreshPauseButton(false);
     }    
   }, [needToRefreshPauseButton]);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      console.log("dentro do interval, o isUserSliding esta com: ",isUserSliding.valueOf());
+      if(!isUserSliding){
+        setCurrentTrackPosition(await TrackPlayer.getPosition());
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   const routeParams = route.params as RouteParams;
 
@@ -52,6 +65,11 @@ const Player: React.FC = () => {
     setIsPlaying(true);
   }, []);
 
+  const handleOnSlidingComplete = useCallback((value: number) => {
+    isUserSliding = false;
+    TrackPlayer.seekTo(value);
+  }, []);
+
   return (
     <Container>
       {routeParams
@@ -61,6 +79,7 @@ const Player: React.FC = () => {
             <AlbumCover source={{uri: routeParams.cover}}/>
             <SongTitle> {routeParams.title} </SongTitle>
             <ArtistName> {routeParams.author} </ArtistName>
+            {console.log("renderizado com :",currentTrackPosition)}
             <Slider 
               style={{
                 width: 300,
@@ -68,9 +87,12 @@ const Player: React.FC = () => {
                 marginTop: 30,
                 marginBottom: 40,
               }}
+              onSlidingStart={() => {isUserSliding = true}}
+              onSlidingComplete={(value) => {handleOnSlidingComplete(value)}}
+              value={currentTrackPosition}
               thumbTintColor="#e5e5e5"
               minimumValue={0}
-              maximumValue={Number(routeParams.duration)}
+              maximumValue={Number(routeParams.duration) / 1000}
               minimumTrackTintColor="#50F"
               maximumTrackTintColor="#AAA"
             />

@@ -20,9 +20,13 @@ interface SongContextData {
   refresh(): void;
   songList: MusicFile[];
   playSong(song: MusicFile): void;
-  TrackPlayer: any;
+  TrackPlayer: any & ITrackPlayer;
   setNeedToRefreshPauseButton(value: boolean): void;
   needToRefreshPauseButton: boolean;
+}
+
+interface ITrackPlayer{
+  getPosition(): Promise<number>;
 }
 
 const { RNReactNativeGetMusicFiles } = NativeModules;
