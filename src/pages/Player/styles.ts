@@ -25,7 +25,22 @@ export const ArtistName = styled.Text`
   font-size: 15px;
 `;
 
+export const CurrentSongPostition = styled.Text`
+  color: #656565;
+`
+
+export const SongDuration = styled.Text`
+  color: #656565;
+`
+
 export const IconContainer = styled.View`
   flex-direction: row;
+`;
+
+export const TimeContainer = styled.View`
+  flex-direction: row;
+  width: 300px;
+  justify-content: space-between;
+  margin-top: 30px;
 `;
 

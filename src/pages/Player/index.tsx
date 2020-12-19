@@ -1,14 +1,13 @@
 import { useRoute } from '@react-navigation/native';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather'
 
-import Slider, { SliderRef } from '@react-native-community/slider'
+import Slider from '@react-native-community/slider'
 
-import { AlbumCover, ArtistName, Container, IconContainer, SongTitle } from './styles';
+import { AlbumCover, ArtistName, Container, CurrentSongPostition, IconContainer, SongDuration, SongTitle, TimeContainer } from './styles';
 import { useSongs } from '../../hooks/songs';
 import { useState } from 'react';
-import { useValue } from 'react-native-reanimated';
 interface RouteParams{
   id: string;
   title: string;
@@ -23,8 +22,13 @@ const Player: React.FC = () => {
   const route = useRoute();
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentTrackPosition, setCurrentTrackPosition] = useState(0);
+  const [currentSongDurantion, setCurrentSongDurantion] = useState('0:00');
+  const [currentTimeStamp, setCurrentTimeStamp] = useState('0:00');
+
   const { TrackPlayer, needToRefreshPauseButton, setNeedToRefreshPauseButton } = useSongs();
   let isUserSliding = false;
+
+  const routeParams = route.params as RouteParams;
   
   useEffect(() => {
     if(needToRefreshPauseButton){
@@ -35,15 +39,18 @@ const Player: React.FC = () => {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      console.log("dentro do interval, o isUserSliding esta com: ",isUserSliding.valueOf());
       if(!isUserSliding){
-        setCurrentTrackPosition(await TrackPlayer.getPosition());
+        const position = await TrackPlayer.getPosition();
+        setCurrentTrackPosition(position);
+        const parsedPosition = handleGetCurrentPosition(position);
+        setCurrentTimeStamp(parsedPosition);
+        const currentTrackDuration = await TrackPlayer.getDuration();
+        const parsedCurrentTrackPosition = handleGetCurrentPosition(currentTrackDuration)
+        setCurrentSongDurantion(parsedCurrentTrackPosition);
       }
     }, 500);
     return () => clearInterval(interval);
   }, []);
-
-  const routeParams = route.params as RouteParams;
 
   const handlePauseSong = useCallback(async () => {
     TrackPlayer.pause();
@@ -70,21 +77,29 @@ const Player: React.FC = () => {
     TrackPlayer.seekTo(value);
   }, []);
 
+  const handleGetCurrentPosition = useCallback((value: number): string => {
+    const minutes = Math.floor(value / 60);
+    const seconds = (Math.floor(value - 60 * minutes)).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`
+  }, []);
+
   return (
     <Container>
       {routeParams
-        ? 
+        ?
         (
           <>
             <AlbumCover source={{uri: routeParams.cover}}/>
             <SongTitle> {routeParams.title} </SongTitle>
             <ArtistName> {routeParams.author} </ArtistName>
-            {console.log("renderizado com :",currentTrackPosition)}
+            <TimeContainer>
+              <CurrentSongPostition>{currentTimeStamp}</CurrentSongPostition>
+              <SongDuration>{currentSongDurantion}</SongDuration>
+            </TimeContainer>
             <Slider 
               style={{
                 width: 300,
                 height: 40,
-                marginTop: 30,
                 marginBottom: 40,
               }}
               onSlidingStart={() => {isUserSliding = true}}
@@ -108,7 +123,7 @@ const Player: React.FC = () => {
             </IconContainer>
           </>
         )
-        : <Text style={{color: "#fff"}}>sem musica</Text>
+        : <Text style={{color: "#fff"}}>sem música</Text>
       }
     </Container>
   );
