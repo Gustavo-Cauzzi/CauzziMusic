@@ -1,3 +1,4 @@
+import TextTicker from 'react-native-text-ticker';
 import styled from 'styled-components/native';
 
 export const Container = styled.View`
@@ -13,11 +14,16 @@ export const AlbumCover = styled.Image`
   border-radius: 15px;
 `;
 
-export const SongTitle = styled.Text`
+export const SongTitleContainer = styled.View`
+  width: 300px;
+`
+
+export const SongTitle = styled(TextTicker)`
   color: #e5e5e5;
   margin-top: 30px;
   margin-bottom: 5px;
   font-size: 30px;
+  overflow: hidden;
 `;
 
 export const ArtistName = styled.Text`

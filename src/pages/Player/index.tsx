@@ -1,11 +1,12 @@
 import { useRoute } from '@react-navigation/native';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather'
+import TextTicker from 'react-native-text-ticker';
 
 import Slider from '@react-native-community/slider'
 
-import { AlbumCover, ArtistName, Container, CurrentSongPostition, IconContainer, SongDuration, SongTitle, TimeContainer } from './styles';
+import { AlbumCover, ArtistName, Container, CurrentSongPostition, IconContainer, SongDuration, SongTitle, SongTitleContainer, TimeContainer } from './styles';
 import { useSongs } from '../../hooks/songs';
 import { useState } from 'react';
 interface RouteParams{
@@ -27,6 +28,7 @@ const Player: React.FC = () => {
 
   const { TrackPlayer, needToRefreshPauseButton, setNeedToRefreshPauseButton } = useSongs();
   let isUserSliding = false;
+  const maxSongTitleLenght = 20;
 
   const routeParams = route.params as RouteParams;
   
@@ -68,7 +70,18 @@ const Player: React.FC = () => {
   }, []);
 
   const handleSkipBackwards = useCallback(async () => {
-    TrackPlayer.skipToPrevious();
+    const currentPosition = await TrackPlayer.getPosition();
+    if(currentPosition <= 5){
+      const track = await TrackPlayer.getCurrentTrack();
+      const queue = await TrackPlayer.getQueue();
+      if(queue[0].id !== track){
+        await TrackPlayer.skipToPrevious();
+      }else{
+        await TrackPlayer.seekTo(0);
+      }
+    }else{
+      await TrackPlayer.seekTo(0);
+    }
     setIsPlaying(true);
   }, []);
 
@@ -90,7 +103,15 @@ const Player: React.FC = () => {
         (
           <>
             <AlbumCover source={{uri: routeParams.cover}}/>
-            <SongTitle> {routeParams.title} </SongTitle>
+            <SongTitleContainer>
+              <SongTitle
+                duration={15000}
+                repeatSpacer={50}
+                marqueeDelay={1000}
+              > 
+                {routeParams.title}
+              </SongTitle>
+            </SongTitleContainer>
             <ArtistName> {routeParams.author} </ArtistName>
             <TimeContainer>
               <CurrentSongPostition>{currentTimeStamp}</CurrentSongPostition>
