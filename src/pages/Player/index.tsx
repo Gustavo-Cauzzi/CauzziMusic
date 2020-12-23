@@ -1,13 +1,15 @@
 import { useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect } from 'react';
-import { Text } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather'
+import IconFeather from 'react-native-vector-icons/Feather'
+import IconFontisto from 'react-native-vector-icons/Fontisto';
+import IconIonicons from 'react-native-vector-icons/Ionicons'
 
 import Slider from '@react-native-community/slider'
 
-import { AlbumCover, ArtistName, Container, CurrentSongPostition, IconContainer, SongDuration, SongTitleTicker, SongTitleContainer, TimeContainer, SongTitle } from './styles';
+import { AlbumCover, ArtistName, Container, CurrentSongPostition, IconContainer, SongDuration, SongTitleTicker, SongTitleContainer, TimeContainer, SongTitle, IconFooter } from './styles';
 import { useSongs } from '../../hooks/songs';
 import { useState } from 'react';
+import { EmptyAlbumCover, EmptyTimeContainer } from './emptyPlayerStyles';
 interface RouteParams{
   id: string;
   title: string;
@@ -36,13 +38,15 @@ const Player: React.FC = () => {
   const [currentTimeStamp, setCurrentTimeStamp] = useState('0:00');
   const [currentTrack, setCurrentTrack] = useState<MusicFile>();
 
+  const { TrackPlayer, needToRefreshPauseButton, setNeedToRefreshPauseButton, songList, changeShuffleValue, changeRepeatValue } = useSongs();
+  let { isShuffleActive: shuffle, isRepeatActive: repeat } = useSongs();
 
-  const { TrackPlayer, needToRefreshPauseButton, setNeedToRefreshPauseButton, songList } = useSongs();
+  const [isShuffleActive, setIsShuffleActive] = useState(shuffle);
+  const [isRepeatActive, setIsRepeatActive] = useState(repeat);
+
   let isUserSliding = false;
   const maxSongTitleLenght = 20;
 
-  // let routeParams = route.params as RouteParams;
-  
   useEffect(() => {
     setCurrentTrack(route.params as MusicFile)
   }, [route.params]);
@@ -126,6 +130,16 @@ const Player: React.FC = () => {
     return `${minutes}:${seconds}`
   }, []);
 
+  const handleShufflePress = useCallback(() => {
+    setIsShuffleActive(!isShuffleActive);
+    changeShuffleValue();
+  }, [isShuffleActive]);
+
+  const handleRepeatPress = useCallback(() => {
+    setIsRepeatActive(!isRepeatActive);
+    changeRepeatValue();
+  }, [isRepeatActive]);
+
   return (
     <Container>
       {currentTrack
@@ -176,18 +190,92 @@ const Player: React.FC = () => {
               maximumTrackTintColor="#AAA"
             />
             <IconContainer>
-              <Icon name="skip-back" size={40} color="#fff" onPress={handleSkipBackwards}/>
+              <IconFeather name="skip-back" size={40} color="#fff" onPress={handleSkipBackwards}/>
 
               {isPlaying 
-                ? <Icon name="pause" size={40} color="#fff" style={{marginRight: 55, marginLeft: 55}} onPress={handlePauseSong}/>
-                : <Icon name="play" size={40} color="#fff" style={{marginRight: 55, marginLeft: 55}} onPress={handlePlaySong}/>
+                ? <IconFeather name="pause" size={40} color="#fff" style={{marginRight: 55, marginLeft: 55}} onPress={handlePauseSong}/>
+                : <IconFeather name="play" size={40} color="#fff" style={{marginRight: 55, marginLeft: 55}} onPress={handlePlaySong}/>
               }
 
-              <Icon name="skip-forward" size={40} color="#fff" onPress={handleSkipFoward}/>
+              <IconFeather name="skip-forward" size={40} color="#fff" onPress={handleSkipFoward}/>
             </IconContainer>
+            <IconFooter>
+              <IconIonicons 
+                name="shuffle" 
+                size={30} 
+                color={
+                  isShuffleActive 
+                    ? "#50f"
+                    : "#a5a5a5"
+                }
+                onPress={handleShufflePress}
+                style={{ marginTop: -4 }}
+              />
+              <IconFeather 
+                name="repeat" 
+                size={20} 
+                color={
+                  isRepeatActive 
+                    ? "#50f"
+                    : "#a5a5a5"
+                }
+                onPress={handleRepeatPress}
+              />
+            </IconFooter>
           </>
         )
-        : <Text style={{color: "#fff"}}>sem música</Text>
+        : (
+          <>
+            <EmptyAlbumCover >
+              <IconFontisto name="music-note" color="#fff" size={125} style={{ marginLeft: -5 }}/>
+            </EmptyAlbumCover>
+            <EmptyTimeContainer>
+              <CurrentSongPostition>0:00</CurrentSongPostition>
+              <SongDuration>0:00</SongDuration>
+            </EmptyTimeContainer>
+            <Slider 
+              style={{
+                width: 300,
+                height: 40,
+                marginBottom: 40,
+              }}
+              value={0}
+              disabled={true}
+              minimumTrackTintColor="#50F"
+              maximumTrackTintColor="#AAA"
+            />
+            <IconContainer>
+              <IconFeather name="skip-back" size={40} color="#fff"/>
+
+              <IconFeather name="play" size={40} color="#fff" style={{marginRight: 55, marginLeft: 55}}/>
+
+              <IconFeather name="skip-forward" size={40} color="#fff"/>
+            </IconContainer>
+            <IconFooter>
+              <IconIonicons 
+                name="shuffle" 
+                size={30} 
+                color={
+                  isShuffleActive 
+                    ? "#50f"
+                    : "#a5a5a5"
+                }
+                onPress={handleShufflePress}
+                style={{ marginTop: -4 }}
+              />
+              <IconFeather 
+                name="repeat" 
+                size={20} 
+                color={
+                  isRepeatActive 
+                    ? "#50f"
+                    : "#a5a5a5"
+                }
+                onPress={handleRepeatPress}
+              />
+            </IconFooter>
+          </>
+        )
       }
     </Container>
   );

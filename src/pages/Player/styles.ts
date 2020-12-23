@@ -19,10 +19,6 @@ export const AlbumCover = styled.Image`
   border-radius: 15px;
 `;
 
-export const SongTitleContainer = styled.View<SongTitleContainer>`
-  width: 300px;
-  ${props => props.text.length > props.maxTextLenght ? null : css`align-items: center`}
-`
 
 export const SongTitleTicker = styled(TextTicker)`
   color: #e5e5e5;
@@ -62,3 +58,15 @@ export const TimeContainer = styled.View`
   margin-top: 30px;
 `;
 
+export const IconFooter = styled.View`
+  flex-direction: row;
+  width: 125px;
+  justify-content: space-between;
+  position: absolute;
+  bottom: 20px;
+`;
+
+export const SongTitleContainer = styled.View<SongTitleContainer>`
+  width: 300px;
+  ${props => props.text.length > props.maxTextLenght ? null : css`align-items: center`}
+`;

@@ -1,9 +1,9 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { PERMISSIONS, request } from 'react-native-permissions';
 import MusicFiles from 'react-native-get-music-files';
 import AsyncStorage from '@react-native-community/async-storage';
 import { NativeEventEmitter, NativeModules } from 'react-native';
-import TrackPlayer, { Track } from 'react-native-track-player';
+import TrackPlayer from 'react-native-track-player';
 interface MusicFile{
   id : number,
   title : string,
@@ -17,12 +17,16 @@ interface MusicFile{
 }
 
 interface SongContextData {
-  refresh(): void;
+  TrackPlayer: any & ITrackPlayer;
   songList: MusicFile[];
   playSong(song: MusicFile): void;
-  TrackPlayer: any & ITrackPlayer;
-  setNeedToRefreshPauseButton(value: boolean): void;
+  refresh(): void;
   needToRefreshPauseButton: boolean;
+  setNeedToRefreshPauseButton(value: boolean): void;
+  isShuffleActive: boolean;
+  isRepeatActive: boolean;
+  changeShuffleValue(): void;
+  changeRepeatValue(): void;
 }
 
 interface ITrackPlayer{
@@ -38,9 +42,8 @@ const SongContext = createContext<SongContextData>({} as SongContextData);
 const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
   const [needToRefreshPauseButton, setNeedToRefreshPauseButton] = useState(false);
-  const [isTheFirstOne, setIsTheFirstOne] = useState(true);
-  const [isShuffleActive, setIsShuffleActive] = useState(true);
-  // const [loading, setLoading] = useState(true);
+  let isRepeatActive = false;
+  let isShuffleActive = false;
   let localScopeSongList: MusicFile[] = [];
 
   useEffect(() => {
@@ -80,7 +83,7 @@ const SongProvider: React.FC = ({ children }) => {
   const refresh = useCallback(() => {
     eventEmitter.addListener('onBatchReceived', (params) => {
       setSongList([params.batch]);
-      console.log("eeeeeeeeeitaaaaaaaaaaa song.tsx/81")
+      console.log("song.tsx/81\n song.tsx/81\n song.tsx/81\n song.tsx/81")
     });
 
     request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE).then((result) => {
@@ -112,6 +115,9 @@ const SongProvider: React.FC = ({ children }) => {
   }, []);
 
   const playSong = useCallback(async (song: MusicFile): Promise<void> => {
+    console.log("shufle: ", isShuffleActive);
+    TrackPlayer.reset();
+
     await TrackPlayer.add({
       id: String(song.id),
       url: song.path,
@@ -120,16 +126,7 @@ const SongProvider: React.FC = ({ children }) => {
       artwork: song.cover,
     });
 
-    const currentTrack = await TrackPlayer.getCurrentTrack();
-
-    if(!isTheFirstOne || currentTrack != String(song.id)){ 
-      TrackPlayer.skipToNext(); 
-      TrackPlayer.play(); 
-      setNeedToRefreshPauseButton(true);
-    }else{
-      TrackPlayer.play();
-      isTheFirstOne ? setIsTheFirstOne(false) : null;
-    }
+    TrackPlayer.play(); 
     
     if(isShuffleActive){
       let songsToAdd: any = [{
@@ -181,8 +178,27 @@ const SongProvider: React.FC = ({ children }) => {
 
   }, [TrackPlayer, localScopeSongList]);
   
+  const changeShuffleValue = useCallback(() => {
+    isShuffleActive = !isShuffleActive;
+  }, [isShuffleActive]);
+
+  const changeRepeatValue = useCallback(() => {
+    isRepeatActive = !isRepeatActive;
+  }, [isRepeatActive]);
+
   return (
-    <SongContext.Provider value={{ songList, refresh, playSong, TrackPlayer, setNeedToRefreshPauseButton, needToRefreshPauseButton }}>
+    <SongContext.Provider value={{ 
+      TrackPlayer, 
+      songList, 
+      playSong, 
+      refresh, 
+      needToRefreshPauseButton, 
+      setNeedToRefreshPauseButton, 
+      isShuffleActive,
+      isRepeatActive,
+      changeShuffleValue,
+      changeRepeatValue,
+    }}>
       {children}
     </SongContext.Provider>
   );

@@ -64,5 +64,5 @@ export const SongAlbumCoverPlaceHolder = styled.View`
   border-radius: 5px;
   justify-content: center;
   align-items: center;
-  background-color: #333;
+  background-color: #252525;
 `;
