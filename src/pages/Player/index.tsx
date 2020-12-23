@@ -2,11 +2,10 @@ import { useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect } from 'react';
 import { Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather'
-import TextTicker from 'react-native-text-ticker';
 
 import Slider from '@react-native-community/slider'
 
-import { AlbumCover, ArtistName, Container, CurrentSongPostition, IconContainer, SongDuration, SongTitle, SongTitleContainer, TimeContainer } from './styles';
+import { AlbumCover, ArtistName, Container, CurrentSongPostition, IconContainer, SongDuration, SongTitleTicker, SongTitleContainer, TimeContainer, SongTitle } from './styles';
 import { useSongs } from '../../hooks/songs';
 import { useState } from 'react';
 interface RouteParams{
@@ -19,19 +18,35 @@ interface RouteParams{
   album: string;
 }
 
+interface MusicFile{
+  id : number,
+  title : string,
+  author : string,
+  album : string,
+  duration : number, // miliseconds
+  cover :string,
+  path : string
+}
+
 const Player: React.FC = () => {
   const route = useRoute();
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentTrackPosition, setCurrentTrackPosition] = useState(0);
   const [currentSongDurantion, setCurrentSongDurantion] = useState('0:00');
   const [currentTimeStamp, setCurrentTimeStamp] = useState('0:00');
+  const [currentTrack, setCurrentTrack] = useState<MusicFile>();
 
-  const { TrackPlayer, needToRefreshPauseButton, setNeedToRefreshPauseButton } = useSongs();
+
+  const { TrackPlayer, needToRefreshPauseButton, setNeedToRefreshPauseButton, songList } = useSongs();
   let isUserSliding = false;
   const maxSongTitleLenght = 20;
 
-  const routeParams = route.params as RouteParams;
+  // let routeParams = route.params as RouteParams;
   
+  useEffect(() => {
+    setCurrentTrack(route.params as MusicFile)
+  }, [route.params]);
+
   useEffect(() => {
     if(needToRefreshPauseButton){
       setIsPlaying(needToRefreshPauseButton);
@@ -67,6 +82,21 @@ const Player: React.FC = () => {
   const handleSkipFoward = useCallback(async () => {
     TrackPlayer.skipToNext();
     setIsPlaying(true);
+
+    const nextTrackId = await TrackPlayer.getCurrentTrack();
+    const {id, title, path, author, cover, duration, album} = songList.find(s => s.id === nextTrackId)!;
+
+    if(nextTrackId){
+      setCurrentTrack({
+        id,
+        title,
+        path,
+        author,
+        cover,
+        duration,
+        album,      
+      })
+    }
   }, []);
 
   const handleSkipBackwards = useCallback(async () => {
@@ -98,21 +128,34 @@ const Player: React.FC = () => {
 
   return (
     <Container>
-      {routeParams
+      {currentTrack
         ?
         (
           <>
-            <AlbumCover source={{uri: routeParams.cover}}/>
-            <SongTitleContainer>
-              <SongTitle
-                duration={15000}
-                repeatSpacer={50}
-                marqueeDelay={1000}
-              > 
-                {routeParams.title}
-              </SongTitle>
+            <AlbumCover source={{uri: currentTrack.cover}}/>
+            <SongTitleContainer
+              text={currentTrack.title}
+              maxTextLenght={maxSongTitleLenght}
+            >
+              {
+                currentTrack.title.length > maxSongTitleLenght
+                  ? (
+                    <SongTitleTicker
+                      duration={15000}
+                      repeatSpacer={50}
+                      marqueeDelay={1000}
+                    > 
+                      {currentTrack.title}
+                    </SongTitleTicker>
+                  )
+                  : (
+                    <SongTitle>
+                      {currentTrack.title}
+                    </SongTitle>
+                  )
+              }
             </SongTitleContainer>
-            <ArtistName> {routeParams.author} </ArtistName>
+            <ArtistName> {currentTrack.author} </ArtistName>
             <TimeContainer>
               <CurrentSongPostition>{currentTimeStamp}</CurrentSongPostition>
               <SongDuration>{currentSongDurantion}</SongDuration>
@@ -128,7 +171,7 @@ const Player: React.FC = () => {
               value={currentTrackPosition}
               thumbTintColor="#e5e5e5"
               minimumValue={0}
-              maximumValue={Number(routeParams.duration) / 1000}
+              maximumValue={Number(currentTrack.duration) / 1000}
               minimumTrackTintColor="#50F"
               maximumTrackTintColor="#AAA"
             />

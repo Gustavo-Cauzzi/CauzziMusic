@@ -1,5 +1,10 @@
 import TextTicker from 'react-native-text-ticker';
-import styled from 'styled-components/native';
+import styled, { css } from 'styled-components/native';
+
+interface SongTitleContainer {
+  text: string;
+  maxTextLenght: number;
+}
 
 export const Container = styled.View`
   flex: 1;
@@ -14,16 +19,23 @@ export const AlbumCover = styled.Image`
   border-radius: 15px;
 `;
 
-export const SongTitleContainer = styled.View`
+export const SongTitleContainer = styled.View<SongTitleContainer>`
   width: 300px;
+  ${props => props.text.length > props.maxTextLenght ? null : css`align-items: center`}
 `
 
-export const SongTitle = styled(TextTicker)`
+export const SongTitleTicker = styled(TextTicker)`
   color: #e5e5e5;
   margin-top: 30px;
   margin-bottom: 5px;
   font-size: 30px;
-  overflow: hidden;
+`;
+
+export const SongTitle = styled.Text`
+  color: #e5e5e5;
+  margin-top: 30px;
+  margin-bottom: 5px;
+  font-size: 30px;
 `;
 
 export const ArtistName = styled.Text`
