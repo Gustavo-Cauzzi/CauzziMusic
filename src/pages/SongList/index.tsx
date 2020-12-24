@@ -1,8 +1,10 @@
 import React, { useCallback } from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, View } from 'react-native';
 import { useSongs } from '../../hooks/songs';
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
+import IconIonicons from 'react-native-vector-icons/Ionicons';
+import IconEntypo from 'react-native-vector-icons/Entypo';
 
 import {ArtistName, Container, Content, Header, MenuButton, SongAlbumCover, SongContainer, SongInfo, SongName, Title, SongAlbumCoverPlaceHolder} from './styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,11 +25,30 @@ interface SongListProps {
 }
 
 const SongList: React.FC<SongListProps> = ({ navigation }) => {
-  const {songList, playSong} = useSongs();
+  const {songList, playSong, changeShuffleValue, setNeedToRefreshShuffleButton} = useSongs();
 
   const handleOpenDrawerMenu = useCallback(() => {
     navigation.openDrawer()
   }, [navigation]);
+
+  const handleIniciateShufflePlaylist = useCallback(() => {
+    const randomIndex = Math.floor(Math.random() * songList.length);
+    playSong(songList[randomIndex]);
+    changeShuffleValue(true);
+    setNeedToRefreshShuffleButton(true);
+
+    const {id, title, path, author, cover, duration, album} = songList[randomIndex];
+    
+    navigation.jumpTo('Player', {
+      id,
+      title,
+      path,
+      author,
+      cover,
+      duration,
+      album,
+    })
+  }, [songList]);
 
   const handlePlayMusic = useCallback((song: MusicFile) => {
     playSong(song);    
@@ -47,11 +68,11 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
 
   return (
     <Container>
+      
       <Header>
-        <MenuButton onPress={handleOpenDrawerMenu}>
-          <IconFeather name="menu" size={25} color="#FFF"/>
-        </MenuButton>
+        <IconFeather name="menu" size={25} color="#FFF" onPress={handleOpenDrawerMenu}/>
         <Title>Lista de Músicas</Title>
+        <IconIonicons name="shuffle" size={25} color="#fff" onPress={handleIniciateShufflePlaylist}/>
       </Header>
       <Content>
         <SafeAreaView>
@@ -76,6 +97,13 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
                 <SongName>{song.title}</SongName>
                 <ArtistName>{song.author}</ArtistName>
               </SongInfo>
+              {/* <IconEntypo 
+                name="dots-three-vertical" 
+                size={20} 
+                color="#bbb" 
+                style={{position: 'absolute', right: 10}}
+                onPress={() => {}}
+              /> */}
             </SongContainer>
           )}
         />

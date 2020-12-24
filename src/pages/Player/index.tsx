@@ -10,6 +10,7 @@ import { AlbumCover, ArtistName, Container, CurrentSongPostition, IconContainer,
 import { useSongs } from '../../hooks/songs';
 import { useState } from 'react';
 import { EmptyAlbumCover, EmptyTimeContainer } from './emptyPlayerStyles';
+// import { addEventListener } from 'react-native-track-player';
 interface RouteParams{
   id: string;
   title: string;
@@ -38,17 +39,35 @@ const Player: React.FC = () => {
   const [currentTimeStamp, setCurrentTimeStamp] = useState('0:00');
   const [currentTrack, setCurrentTrack] = useState<MusicFile>();
 
-  const { TrackPlayer, needToRefreshPauseButton, setNeedToRefreshPauseButton, songList, changeShuffleValue, changeRepeatValue } = useSongs();
-  let { isShuffleActive: shuffle, isRepeatActive: repeat } = useSongs();
+  const { 
+    TrackPlayer, 
+    needToRefreshPauseButton, 
+    setNeedToRefreshPauseButton, 
+    songList, 
+    changeShuffleValue, 
+    needToRefreshShuffleButton,
+    setNeedToRefreshShuffleButton,
+  } = useSongs();
+  let { isShuffleActive: shuffle } = useSongs();
 
   const [isShuffleActive, setIsShuffleActive] = useState(shuffle);
-  const [isRepeatActive, setIsRepeatActive] = useState(repeat);
+  const [isRepeatActive, setIsRepeatActive] = useState(false);
 
   let isUserSliding = false;
-  const maxSongTitleLenght = 20;
+  const maxSongTitleLenght = 19;
+
+  useEffect(() => {
+    TrackPlayer.addEventListener('playback-track-changed', async () => {
+      const newCurrentTrackId = await TrackPlayer.getCurrentTrack();
+      const newCurrentTrack = songList.find(s => s.id == newCurrentTrackId);
+
+      setCurrentTrack(newCurrentTrack);
+    })
+  }, []);
 
   useEffect(() => {
     setCurrentTrack(route.params as MusicFile)
+    setIsPlaying(true);
   }, [route.params]);
 
   useEffect(() => {
@@ -57,6 +76,13 @@ const Player: React.FC = () => {
       setNeedToRefreshPauseButton(false);
     }    
   }, [needToRefreshPauseButton]);
+
+  useEffect(() => {
+    if(needToRefreshShuffleButton){
+      setIsShuffleActive(needToRefreshShuffleButton);
+      setNeedToRefreshShuffleButton(false);
+    }    
+  }, [needToRefreshShuffleButton]);
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -117,6 +143,21 @@ const Player: React.FC = () => {
       await TrackPlayer.seekTo(0);
     }
     setIsPlaying(true);
+
+    const nextTrackId = await TrackPlayer.getCurrentTrack();
+    const {id, title, path, author, cover, duration, album} = songList.find(s => s.id === nextTrackId)!;
+
+    if(nextTrackId){
+      setCurrentTrack({
+        id,
+        title,
+        path,
+        author,
+        cover,
+        duration,
+        album,      
+      })
+    }
   }, []);
 
   const handleOnSlidingComplete = useCallback((value: number) => {
@@ -137,7 +178,6 @@ const Player: React.FC = () => {
 
   const handleRepeatPress = useCallback(() => {
     setIsRepeatActive(!isRepeatActive);
-    changeRepeatValue();
   }, [isRepeatActive]);
 
   return (
@@ -146,7 +186,15 @@ const Player: React.FC = () => {
         ?
         (
           <>
-            <AlbumCover source={{uri: currentTrack.cover}}/>
+            {
+              currentTrack.cover 
+                ? <AlbumCover source={{uri: currentTrack.cover}}/>
+                : (
+                  <EmptyAlbumCover >
+                    <IconFontisto name="music-note" color="#fff" size={125} style={{ marginLeft: -5 }}/>
+                  </EmptyAlbumCover>
+                )
+            }
             <SongTitleContainer
               text={currentTrack.title}
               maxTextLenght={maxSongTitleLenght}
@@ -187,7 +235,7 @@ const Player: React.FC = () => {
               minimumValue={0}
               maximumValue={Number(currentTrack.duration) / 1000}
               minimumTrackTintColor="#50F"
-              maximumTrackTintColor="#AAA"
+              maximumTrackTintColor="#AAA"            
             />
             <IconContainer>
               <IconFeather name="skip-back" size={40} color="#fff" onPress={handleSkipBackwards}/>

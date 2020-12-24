@@ -22,11 +22,11 @@ interface SongContextData {
   playSong(song: MusicFile): void;
   refresh(): void;
   needToRefreshPauseButton: boolean;
+  needToRefreshShuffleButton: boolean;
   setNeedToRefreshPauseButton(value: boolean): void;
+  setNeedToRefreshShuffleButton(value: boolean): void;
   isShuffleActive: boolean;
-  isRepeatActive: boolean;
-  changeShuffleValue(): void;
-  changeRepeatValue(): void;
+  changeShuffleValue(value?: boolean): void;
 }
 
 interface ITrackPlayer{
@@ -42,11 +42,12 @@ const SongContext = createContext<SongContextData>({} as SongContextData);
 const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
   const [needToRefreshPauseButton, setNeedToRefreshPauseButton] = useState(false);
-  let isRepeatActive = false;
+  const [needToRefreshShuffleButton, setNeedToRefreshShuffleButton] = useState(false);
   let isShuffleActive = false;
   let localScopeSongList: MusicFile[] = [];
 
   useEffect(() => {
+
     async function loadDataFromStorage(){
       const songListFromStorage = await AsyncStorage.getItem("PlayerCauzziTeste3:songList");
 
@@ -115,7 +116,6 @@ const SongProvider: React.FC = ({ children }) => {
   }, []);
 
   const playSong = useCallback(async (song: MusicFile): Promise<void> => {
-    console.log("shufle: ", isShuffleActive);
     TrackPlayer.reset();
 
     await TrackPlayer.add({
@@ -127,7 +127,12 @@ const SongProvider: React.FC = ({ children }) => {
     });
 
     TrackPlayer.play(); 
-    
+    console.log("gerar o queueueueuee")
+    generateQueue(song);
+  }, [TrackPlayer, localScopeSongList]);
+  
+  const generateQueue = useCallback((song: MusicFile) => {
+    console.log("entrou no generate")
     if(isShuffleActive){
       let songsToAdd: any = [{
         id: String(song.id),
@@ -175,16 +180,36 @@ const SongProvider: React.FC = ({ children }) => {
 
       TrackPlayer.add(songsToAdd);
     } 
-
   }, [TrackPlayer, localScopeSongList]);
-  
-  const changeShuffleValue = useCallback(() => {
-    isShuffleActive = !isShuffleActive;
+
+  const changeShuffleValue = useCallback((value?: boolean) => {
+    if(value != undefined){
+      isShuffleActive = value;
+    }else{
+      isShuffleActive = !isShuffleActive;
+    }
+
+    resetQueue();
   }, [isShuffleActive]);
 
-  const changeRepeatValue = useCallback(() => {
-    isRepeatActive = !isRepeatActive;
-  }, [isRepeatActive]);
+  const resetQueue = useCallback(async () => {
+    const currentTrackId = await TrackPlayer.getCurrentTrack();
+    if(currentTrackId){
+      const currentTrack = localScopeSongList.find(s => s.id == Number(currentTrackId))!;
+    
+      await TrackPlayer.removeUpcomingTracks();
+      const currentQueue = await TrackPlayer.getQueue();
+      
+      if(currentQueue.length > 1){
+        const idsToRemoveFromQueue = currentQueue.map((s) => s.id);
+        const filteredIdsToRemoveFromQueue = idsToRemoveFromQueue.filter((id, index) => index < currentQueue.length - 1 ? id : null);
+
+        await TrackPlayer.remove(filteredIdsToRemoveFromQueue)
+      }
+
+      generateQueue(currentTrack);
+    }
+  }, [TrackPlayer, localScopeSongList]);
 
   return (
     <SongContext.Provider value={{ 
@@ -193,11 +218,11 @@ const SongProvider: React.FC = ({ children }) => {
       playSong, 
       refresh, 
       needToRefreshPauseButton, 
+      needToRefreshShuffleButton,
       setNeedToRefreshPauseButton, 
+      setNeedToRefreshShuffleButton,
       isShuffleActive,
-      isRepeatActive,
       changeShuffleValue,
-      changeRepeatValue,
     }}>
       {children}
     </SongContext.Provider>

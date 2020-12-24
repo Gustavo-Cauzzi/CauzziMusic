@@ -7,7 +7,6 @@ export const EmptyAlbumCover = styled.View`
   background-color: #252525;
   justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
 `;
 
 export const EmptyTimeContainer = styled.View`
@@ -15,5 +14,5 @@ export const EmptyTimeContainer = styled.View`
   width: 300px;
   justify-content: space-between;
   margin-top: 30px;
-  margin-top: 115px;
+  margin-top: 135px;
 `;

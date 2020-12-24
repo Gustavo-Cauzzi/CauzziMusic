@@ -13,14 +13,15 @@ export const Content = styled.View`
 export const Header = styled.View`
   /* background-color: #55f; */
   flex-direction: row;
-  justify-content: center;
-  padding: 10px 0;
+  justify-content: space-between;
+  padding: 10px 15px;
   border-bottom-width: 2px;  
   border-bottom-color: #50f; 
+  height: 50px;
 `;  
 
 export const MenuButton = styled.TouchableOpacity`
-  left: -85px;
+  /* left: -85px; */
 `;
 
 export const Title = styled.Text`
