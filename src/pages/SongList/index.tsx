@@ -1,13 +1,14 @@
 import React, { useCallback } from 'react';
-import { FlatList, View } from 'react-native';
+import { FlatList } from 'react-native';
 import { useSongs } from '../../hooks/songs';
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
 import IconIonicons from 'react-native-vector-icons/Ionicons';
-import IconEntypo from 'react-native-vector-icons/Entypo';
+// import IconEntypo from 'react-native-vector-icons/Entypo';
 
-import {ArtistName, Container, Content, Header, MenuButton, SongAlbumCover, SongContainer, SongInfo, SongName, Title, SongAlbumCoverPlaceHolder} from './styles';
+import {ArtistName, Container, Content, Header, SongAlbumCover, SongContainer, SongInfo, SongName, Title, SongAlbumCoverPlaceHolder} from './styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+// import PopupMenu from '../../components/PopupMenu';
 interface MusicFile{
   id : number,
   title : string,
@@ -102,7 +103,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
                 size={20} 
                 color="#bbb" 
                 style={{position: 'absolute', right: 10}}
-                onPress={() => {}}
+                onPress={() => {<PopupMenu />}}
               /> */}
             </SongContainer>
           )}

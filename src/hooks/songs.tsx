@@ -27,6 +27,7 @@ interface SongContextData {
   setNeedToRefreshShuffleButton(value: boolean): void;
   isShuffleActive: boolean;
   changeShuffleValue(value?: boolean): void;
+  isLoading: boolean;
 }
 
 interface ITrackPlayer{
@@ -43,6 +44,7 @@ const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
   const [needToRefreshPauseButton, setNeedToRefreshPauseButton] = useState(false);
   const [needToRefreshShuffleButton, setNeedToRefreshShuffleButton] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   let isShuffleActive = false;
   let localScopeSongList: MusicFile[] = [];
 
@@ -82,6 +84,9 @@ const SongProvider: React.FC = ({ children }) => {
   }, []);
 
   const refresh = useCallback(() => {
+    setSongList({} as MusicFile[]);
+    setIsLoading(true);
+
     eventEmitter.addListener('onBatchReceived', (params) => {
       setSongList([params.batch]);
       console.log("song.tsx/81\n song.tsx/81\n song.tsx/81\n song.tsx/81")
@@ -105,11 +110,13 @@ const SongProvider: React.FC = ({ children }) => {
           minimumSongDuration : 10000, // get songs bigger than 10000 miliseconds duration,
         }).then(async (tracks: MusicFile[]) => {
             console.log('tracks ',tracks);
+            setIsLoading(false);
             setSongList(tracks);
 
             await AsyncStorage.setItem("PlayerCauzziTeste3:songList", JSON.stringify(tracks));
         }).catch((error: any) => {
             console.log('error: ',error);
+            setIsLoading(false);
         })
       }
     });
@@ -223,6 +230,7 @@ const SongProvider: React.FC = ({ children }) => {
       setNeedToRefreshShuffleButton,
       isShuffleActive,
       changeShuffleValue,
+      isLoading
     }}>
       {children}
     </SongContext.Provider>

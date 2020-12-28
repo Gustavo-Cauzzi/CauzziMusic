@@ -1,22 +1,88 @@
-import React from 'react';
-import { View, Button } from 'react-native';
-import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import React, { useCallback, useEffect, useState } from 'react';
+import { DrawerContentComponentProps } from '@react-navigation/drawer';
+import { Container, Content, PageList, PageName, PageItem, Footer, FooterText, FooterItem, LoadingText } from './styles';
+import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import IconFeather from 'react-native-vector-icons/Feather';
+import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useSongs } from '../../hooks/songs';
+import { Alert, View } from 'react-native';
 
-interface DrawerViewProps{
-  props: any;
-  children: any;
-}
+const DrawerView: React.FC<DrawerContentComponentProps> = (props) => {
+  const [pageSelected, setPageSelected] = useState(0);
+  const { refresh, isLoading } = useSongs();
 
-const DrawerView: React.FC<DrawerViewProps> = ({props}) => {
+  useEffect(() => {
+    setPageSelected(props.state.index);
+  }, [props.state.index]);
+
+  const handleItemSelected = useCallback((id: number, pageName: string) => {
+    if(pageSelected != id){
+      setPageSelected(id);
+      props.navigation.navigate(pageName);
+    }else{
+      props.navigation.toggleDrawer();
+    }
+  }, [pageSelected]);
+
+  const handleRefreshSongList = useCallback(() => {
+    Alert.alert('Você tem certeza?','O Aplicativo precisará de em torno de 1~2 minutos para atualizar a sua lista de música. Você tem certeza que deseja executar agora?',[
+      {
+        text: "Sim",
+        onPress: () => {refresh()},
+      },
+      { 
+        text: "Não", 
+        onPress: () => console.log("Ação Cancelada") 
+      }
+    ])
+  }, []);
+
   return (
-  <DrawerContentScrollView {...props}>
-    <DrawerItemList {...props}/>
-    <View>
-      <Button title="aaaaaaaaaaaaaa" onPress={() => props.navigation.toggleDrawer()}>
-      </Button>
-    </View>
-  </DrawerContentScrollView>
+    <Container>
+      <Content>
+        <PageList>
+          <PageItem isSelected={pageSelected == 0} onPress={() => {handleItemSelected(0, 'SongList')}} >
+            <IconMaterialCommunityIcons name="music-note-half" size={22} color="#fff"/>
+            <PageName>Lista de Músicas</PageName>
+          </PageItem>
+          <PageItem isSelected={pageSelected == 1} onPress={() => {handleItemSelected(1, 'ArtistList')}} >
+            <IconFeather name="user" size={22} color="#fff"/>
+            <PageName>Lista de Artistas</PageName>
+          </PageItem>
+        </PageList>
+
+      </Content>
+      <Footer>
+        <FooterItem onPress={() => {}}>
+          <IconMaterialCommunityIcons name="magnify" size={20} color="#d3d3d3" />
+          <FooterText>Buscar música</FooterText>
+        </FooterItem>
+        {isLoading 
+          ? (
+            <View style={{ flexDirection: 'row' }}>
+              <IconMaterialIcons name="refresh" size={20} color="#777" />
+              <LoadingText>
+                Carregando...
+              </LoadingText>
+            </View>
+          )
+          : (
+            <FooterItem onPress={handleRefreshSongList}>
+              <IconMaterialIcons name="refresh" size={20} color="#d3d3d3" />
+              <FooterText>Atualizar músicas</FooterText>
+            </FooterItem>
+          )
+        }
+      </Footer>
+    </Container>
   );
 }
 
 export default DrawerView;
+
+
+{/* <RectButton onPress={() => {props.navigation.navigate('ArtistList')}}>
+  <Text style={{color: "#000"}}>
+    AAAAAAAAAAA
+  </Text>
+</RectButton> */}
