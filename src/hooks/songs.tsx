@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { PERMISSIONS, request } from 'react-native-permissions';
-import MusicFiles from 'react-native-get-music-files';
+import MusicFiles from 'react-native-get-music-files-v3dev-test';
 import AsyncStorage from '@react-native-community/async-storage';
 import { DeviceEventEmitter, NativeEventEmitter, NativeModules } from 'react-native';
 import TrackPlayer from 'react-native-track-player';
@@ -16,6 +16,18 @@ interface MusicFile{
   path : string
 }
 
+interface MusicFilesResult{
+  lenght?: number,
+  results: {
+    id: number,
+    path: string,
+    cover?: string,
+    duration: number,
+    album: string,
+    artist: string,
+    title: string
+  }[],
+}
 interface SongContextData {
   TrackPlayer: any & ITrackPlayer;
   songList: MusicFile[];
@@ -36,8 +48,6 @@ interface ITrackPlayer{
 
 const { RNReactNativeGetMusicFiles } = NativeModules;
 
-const eventEmitter = new NativeEventEmitter(RNReactNativeGetMusicFiles);
-
 const SongContext = createContext<SongContextData>({} as SongContextData);
 
 const SongProvider: React.FC = ({ children }) => {
@@ -49,17 +59,36 @@ const SongProvider: React.FC = ({ children }) => {
   let localScopeSongList: MusicFile[] = [];
 
   useEffect(() => {
+    request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE).then((result) => {
+      if(result == 'granted'){
+        MusicFiles.getAll({
+          cover: false,
+          batchSize: 0,
+          batchNumber: 0,
+          minimumSongDuration: 10000,
+          sortBy: 'TITLE',
+          sortOrder: 'ASC'
+        }).then((result: MusicFilesResult) => {
+          const arrayToAdd = result.results.map((song: any) => {
+            return {
+              ...song,  
+              author: song.artist,
+            }
+          })
+  
+          console.log(arrayToAdd);
 
-    async function loadDataFromStorage(){
-      const songListFromStorage = await AsyncStorage.getItem("PlayerCauzziTeste3:songList");
+          setSongList(arrayToAdd);
 
-      // if(songListFromStorage){
-        // setSongList(JSON.parse(songListFromStorage))
-        // localScopeSongList = JSON.parse(songListFromStorage)
-      // }else{
-        refresh();
-      // }
-    }
+          handleGetMusicFilesWithCovers();
+        }).catch((error: any) => {
+            console.log('error: ',error);
+            setIsLoading(false);
+        })
+      }else{
+        console.log(result);
+      }
+    });
 
     async function setupMusicPlayer(){
       TrackPlayer.setupPlayer().then(async () => {
@@ -80,8 +109,38 @@ const SongProvider: React.FC = ({ children }) => {
     }
 
     setupMusicPlayer();
-    loadDataFromStorage();
   }, []);
+
+  const handleGetMusicFilesWithCovers = useCallback(() => {
+    // DeviceEventEmitter.addListener('onBatchRecived', (params) => {
+    //   console.log("batch: ",params.batch)
+    // })
+
+    MusicFiles.getAll({
+      cover: true,
+      coverFolder: '/storage/emulated/0/.covers/',
+      batchSize: 0,
+      batchNumber: 0,
+      minimumSongDuration: 10000,
+      sortBy: 'TITLE',
+      sortOrder: 'ASC'
+    }).then((result: MusicFilesResult) => {
+      const arrayToAdd = result.results.map((song: any) => {
+        return {
+          ...song,  
+          author: song.artist,
+          cover: song.cover ? `file://${song.cover}` : undefined,
+        }
+      })
+
+      console.log('albuns adiquiridos');
+
+      setSongList(arrayToAdd);
+    }).catch((error: any) => {
+        console.log('error: ',error);
+        setIsLoading(false);
+    })
+  }, [])
 
   const refresh = useCallback(() => {
     setSongList({} as MusicFile[]);
@@ -98,30 +157,7 @@ const SongProvider: React.FC = ({ children }) => {
       console.log(result);
     });
 
-  //   request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE).then((result) => {
-  //     console.log(result);
-  //     if(result == 'granted'){
-  //       MusicFiles.getAll({
-  //         id: true,
-  //         blured : false, // works only when 'cover' is set to true
-  //         artist : true,
-  //         duration : true, //default : true
-  //         cover : true, //default : true,
-  //         genre : true,
-  //         title : true,
-  //         minimumSongDuration : 10000, // get songs bigger than 10000 miliseconds duration,
-  //       }).then(async (tracks: MusicFile[]) => {
-  //           console.log('tracks ',tracks);
-  //           setIsLoading(false);
-  //           setSongList(tracks);
-
-  //           await AsyncStorage.setItem("PlayerCauzziTeste3:songList", JSON.stringify(tracks));
-  //       }).catch((error: any) => {
-  //           console.log('error: ',error);
-  //           setIsLoading(false);
-  //       })
-  //     }
-  //   });
+    
   }, []);
 
   const playSong = useCallback(async (song: MusicFile): Promise<void> => {
@@ -250,3 +286,9 @@ const useSongs = (): SongContextData => {
 }
 
 export { useSongs, SongProvider};
+
+/*
+
+
+
+*/
