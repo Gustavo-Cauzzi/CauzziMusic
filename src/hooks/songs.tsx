@@ -1,8 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { PERMISSIONS, request } from 'react-native-permissions';
 import MusicFiles from 'react-native-get-music-files-v3dev-test';
-import AsyncStorage from '@react-native-community/async-storage';
-import { DeviceEventEmitter, NativeEventEmitter, NativeModules } from 'react-native';
 import TrackPlayer from 'react-native-track-player';
 interface MusicFile{
   id : number,
@@ -32,7 +30,6 @@ interface SongContextData {
   TrackPlayer: any & ITrackPlayer;
   songList: MusicFile[];
   playSong(song: MusicFile): void;
-  refresh(): void;
   needToRefreshPauseButton: boolean;
   needToRefreshShuffleButton: boolean;
   setNeedToRefreshPauseButton(value: boolean): void;
@@ -46,19 +43,22 @@ interface ITrackPlayer{
   getPosition(): Promise<number>;
 }
 
-const { RNReactNativeGetMusicFiles } = NativeModules;
-
 const SongContext = createContext<SongContextData>({} as SongContextData);
 
 const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
   const [needToRefreshPauseButton, setNeedToRefreshPauseButton] = useState(false);
   const [needToRefreshShuffleButton, setNeedToRefreshShuffleButton] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingAlbumCovers, setIsLoadingAlbumCovers] = useState(true);
   let isShuffleActive = false;
   let localScopeSongList: MusicFile[] = [];
 
   useEffect(() => {
+    request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE).then((result) => {
+      result != 'granted' ? console.log(result) : null
+    })
+    
     request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE).then((result) => {
       if(result == 'granted'){
         MusicFiles.getAll({
@@ -76,10 +76,12 @@ const SongProvider: React.FC = ({ children }) => {
             }
           })
   
-          console.log(arrayToAdd);
+          // console.log(arrayToAdd);
+          console.log('musicas adiquiridas');
 
+          setIsLoading(false);
+          localScopeSongList = arrayToAdd;
           setSongList(arrayToAdd);
-
           handleGetMusicFilesWithCovers();
         }).catch((error: any) => {
             console.log('error: ',error);
@@ -111,11 +113,8 @@ const SongProvider: React.FC = ({ children }) => {
     setupMusicPlayer();
   }, []);
 
+  
   const handleGetMusicFilesWithCovers = useCallback(() => {
-    // DeviceEventEmitter.addListener('onBatchRecived', (params) => {
-    //   console.log("batch: ",params.batch)
-    // })
-
     MusicFiles.getAll({
       cover: true,
       coverFolder: '/storage/emulated/0/.covers/',
@@ -134,31 +133,14 @@ const SongProvider: React.FC = ({ children }) => {
       })
 
       console.log('albuns adiquiridos');
-
+      localScopeSongList = arrayToAdd;
+      setIsLoadingAlbumCovers(false);
       setSongList(arrayToAdd);
     }).catch((error: any) => {
         console.log('error: ',error);
-        setIsLoading(false);
+        setIsLoadingAlbumCovers(false);
     })
   }, [])
-
-  const refresh = useCallback(() => {
-    setSongList({} as MusicFile[]);
-    setIsLoading(true);
-
-    DeviceEventEmitter.addListener('onBatchReceived', (params) => {
-      setSongList([params.batch]);
-      // localScopeSongList = localScopeSongList.push()
-      console.log("params.batch: ",params.batch);
-      // console.log("song.tsx/81\n song.tsx/81\n song.tsx/81\n song.tsx/81")
-    });
-
-    request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE).then((result) => {
-      console.log(result);
-    });
-
-    
-  }, []);
 
   const playSong = useCallback(async (song: MusicFile): Promise<void> => {
     TrackPlayer.reset();
@@ -172,12 +154,10 @@ const SongProvider: React.FC = ({ children }) => {
     });
 
     TrackPlayer.play(); 
-    console.log("gerar o queueueueuee")
     generateQueue(song);
   }, [TrackPlayer, localScopeSongList]);
   
   const generateQueue = useCallback((song: MusicFile) => {
-    console.log("entrou no generate")
     if(isShuffleActive){
       let songsToAdd: any = [{
         id: String(song.id),
@@ -206,7 +186,6 @@ const SongProvider: React.FC = ({ children }) => {
 
       TrackPlayer.add(songsToAdd);
     }else{
-      // const currentTrack = await TrackPlayer.getCurrentTrack();     // maybe not having this could be a problem in the future (but probably not)
       const index = localScopeSongList.findIndex(s => s.id === song.id);
       
       const songsToAddList = localScopeSongList.map((s, i) => {
@@ -261,7 +240,6 @@ const SongProvider: React.FC = ({ children }) => {
       TrackPlayer, 
       songList, 
       playSong, 
-      refresh, 
       needToRefreshPauseButton, 
       needToRefreshShuffleButton,
       setNeedToRefreshPauseButton, 
