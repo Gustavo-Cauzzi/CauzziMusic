@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { PERMISSIONS, request } from 'react-native-permissions';
 import MusicFiles from 'react-native-get-music-files-v3dev-test';
 import TrackPlayer from 'react-native-track-player';
+import AsyncStorage from '@react-native-community/async-storage';
 interface MusicFile{
   id : number,
   title : string,
@@ -14,6 +15,10 @@ interface MusicFile{
   path : string
 }
 
+interface AlbumCover {
+  id: number,
+  cover: string | undefined;
+}
 interface MusicFilesResult{
   lenght?: number,
   results: {
@@ -53,11 +58,20 @@ const SongProvider: React.FC = ({ children }) => {
   const [isLoadingAlbumCovers, setIsLoadingAlbumCovers] = useState(true);
   let isShuffleActive = false;
   let localScopeSongList: MusicFile[] = [];
+  let albumsCoverArray: AlbumCover[] = [];
 
+  async function loadAsyncInfo(){
+    const albumArrayFromStorage = await AsyncStorage.getItem("CauzziMusic:AlbumArray");
+
+    if(albumArrayFromStorage){
+      albumsCoverArray = JSON.parse(albumArrayFromStorage);
+    }
+  }
 
   useEffect(() => {
     if(songList.length == 0){
-      console.log('entrou', songList.length);
+      loadAsyncInfo();
+
       request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE).then((result) => {
         result != 'granted' ? console.log(result) : null
       })
@@ -73,18 +87,26 @@ const SongProvider: React.FC = ({ children }) => {
             sortOrder: 'ASC'
           }).then((result: MusicFilesResult) => {
             const arrayToAdd = result.results.map((song: any) => {
+              const albumIndex = albumsCoverArray.findIndex(a => a.id == song.id);
+
               return {
                 ...song,  
                 author: song.artist,
+                cover: albumIndex != -1 
+                        ?  albumsCoverArray[albumIndex].cover != undefined
+                          ?  `file://${albumsCoverArray[albumIndex].cover}`
+                          : undefined
+                        : undefined
               }
             })
     
-            // console.log(arrayToAdd);
             console.log('musicas adiquiridas');
   
-            setIsLoading(false);
             localScopeSongList = arrayToAdd;
+            setIsLoading(false);
             setSongList(arrayToAdd);
+
+
             handleGetMusicFilesWithCovers();
           }).catch((error: any) => {
               console.log('error: ',error);
@@ -127,10 +149,6 @@ const SongProvider: React.FC = ({ children }) => {
     setupMusicPlayer();
   }, []);
 
-  TrackPlayer.addEventListener('remote-next', async () => {
-    console.log('pauseeee'); 
-  })
-  
   const handleGetMusicFilesWithCovers = useCallback(() => {
     MusicFiles.getAll({
       cover: true,
@@ -141,23 +159,54 @@ const SongProvider: React.FC = ({ children }) => {
       sortBy: 'TITLE',
       sortOrder: 'ASC'
     }).then((result: MusicFilesResult) => {
-      const arrayToAdd = result.results.map((song: any) => {
-        return {
-          ...song,  
-          author: song.artist,
-          cover: song.cover ? `file://${song.cover}` : undefined,
-        }
-      })
-
       console.log('albuns adiquiridos');
-      localScopeSongList = arrayToAdd;
-      setIsLoadingAlbumCovers(false);
-      setSongList(arrayToAdd);
+      let itNeedsToRefreshAlbumArray = false;
+
+      result.results.map((song: any) => {
+        const albumIndex = albumsCoverArray.findIndex(a => a.id == song.id);
+        if(albumIndex != -1){
+          const stringToTest = song.cover != '' ? String(`file://${song.cover}`) : undefined;
+
+          if(albumsCoverArray[albumIndex].cover != stringToTest){
+            itNeedsToRefreshAlbumArray = true;
+            albumsCoverArray[albumIndex] = {
+              id: song.id,
+              cover: song.cover ? `file://${song.cover}` : undefined,
+            }
+          }
+        }else{
+          itNeedsToRefreshAlbumArray = true;
+          albumsCoverArray.push({
+            id: song.id,
+            cover: song.cover ? `file://${song.cover}` : undefined,
+          })
+        }
+      });
+
+      if(itNeedsToRefreshAlbumArray){
+        AsyncStorage.setItem("CauzziMusic:AlbumArray", JSON.stringify(albumsCoverArray))
+
+        const refreshedSongList: any = localScopeSongList.map(s => {
+          const index = albumsCoverArray.findIndex(a => a.id == s.id);  
+
+          if(index == -1){
+            return s;
+          }else{
+            return {
+              ...s,
+              cover: String(s.cover) != albumsCoverArray[index].cover ? albumsCoverArray[index].cover : s.cover
+            }
+          }
+        })
+
+        // console.log(refreshedSongList)
+        setSongList(refreshedSongList);
+      }
     }).catch((error: any) => {
         console.log('error: ',error);
         setIsLoadingAlbumCovers(false);
     })
-  }, [])
+  }, [localScopeSongList, albumsCoverArray])
 
   const playSong = useCallback(async (song: MusicFile): Promise<void> => {
     TrackPlayer.reset();
