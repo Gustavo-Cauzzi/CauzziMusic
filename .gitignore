@@ -33,6 +33,7 @@ local.properties
 #
 .vscode/
 
+.android/app/buildKeyThings.md
 # node.js
 #
 node_modules/

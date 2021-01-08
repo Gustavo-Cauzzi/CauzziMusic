@@ -1,8 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { PERMISSIONS, request } from 'react-native-permissions';
-import MusicFiles from 'react-native-get-music-files';
-import AsyncStorage from '@react-native-community/async-storage';
-import { NativeEventEmitter, NativeModules } from 'react-native';
+import MusicFiles from 'react-native-get-music-files-v3dev-test';
 import TrackPlayer from 'react-native-track-player';
 interface MusicFile{
   id : number,
@@ -16,11 +14,22 @@ interface MusicFile{
   path : string
 }
 
+interface MusicFilesResult{
+  lenght?: number,
+  results: {
+    id: number,
+    path: string,
+    cover?: string,
+    duration: number,
+    album: string,
+    artist: string,
+    title: string
+  }[],
+}
 interface SongContextData {
   TrackPlayer: any & ITrackPlayer;
   songList: MusicFile[];
   playSong(song: MusicFile): void;
-  refresh(): void;
   needToRefreshPauseButton: boolean;
   needToRefreshShuffleButton: boolean;
   setNeedToRefreshPauseButton(value: boolean): void;
@@ -34,32 +43,54 @@ interface ITrackPlayer{
   getPosition(): Promise<number>;
 }
 
-const { RNReactNativeGetMusicFiles } = NativeModules;
-
-const eventEmitter = new NativeEventEmitter(RNReactNativeGetMusicFiles);
-
 const SongContext = createContext<SongContextData>({} as SongContextData);
 
 const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
   const [needToRefreshPauseButton, setNeedToRefreshPauseButton] = useState(false);
   const [needToRefreshShuffleButton, setNeedToRefreshShuffleButton] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingAlbumCovers, setIsLoadingAlbumCovers] = useState(true);
   let isShuffleActive = false;
   let localScopeSongList: MusicFile[] = [];
 
   useEffect(() => {
+    request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE).then((result) => {
+      result != 'granted' ? console.log(result) : null
+    })
+    
+    request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE).then((result) => {
+      if(result == 'granted'){
+        MusicFiles.getAll({
+          cover: false,
+          batchSize: 0,
+          batchNumber: 0,
+          minimumSongDuration: 10000,
+          sortBy: 'TITLE',
+          sortOrder: 'ASC'
+        }).then((result: MusicFilesResult) => {
+          const arrayToAdd = result.results.map((song: any) => {
+            return {
+              ...song,  
+              author: song.artist,
+            }
+          })
+  
+          // console.log(arrayToAdd);
+          console.log('musicas adiquiridas');
 
-    async function loadDataFromStorage(){
-      const songListFromStorage = await AsyncStorage.getItem("PlayerCauzziTeste3:songList");
-
-      if(songListFromStorage){
-        setSongList(JSON.parse(songListFromStorage))
-       localScopeSongList = JSON.parse(songListFromStorage)
+          setIsLoading(false);
+          localScopeSongList = arrayToAdd;
+          setSongList(arrayToAdd);
+          handleGetMusicFilesWithCovers();
+        }).catch((error: any) => {
+            console.log('error: ',error);
+            setIsLoading(false);
+        })
       }else{
-        refresh();
+        console.log(result);
       }
-    }
+    });
 
     async function setupMusicPlayer(){
       TrackPlayer.setupPlayer().then(async () => {
@@ -80,47 +111,36 @@ const SongProvider: React.FC = ({ children }) => {
     }
 
     setupMusicPlayer();
-    loadDataFromStorage();
   }, []);
 
-  const refresh = useCallback(() => {
-    setSongList({} as MusicFile[]);
-    setIsLoading(true);
+  
+  const handleGetMusicFilesWithCovers = useCallback(() => {
+    MusicFiles.getAll({
+      cover: true,
+      coverFolder: '/storage/emulated/0/.covers/',
+      batchSize: 0,
+      batchNumber: 0,
+      minimumSongDuration: 10000,
+      sortBy: 'TITLE',
+      sortOrder: 'ASC'
+    }).then((result: MusicFilesResult) => {
+      const arrayToAdd = result.results.map((song: any) => {
+        return {
+          ...song,  
+          author: song.artist,
+          cover: song.cover ? `file://${song.cover}` : undefined,
+        }
+      })
 
-    eventEmitter.addListener('onBatchReceived', (params) => {
-      setSongList([params.batch]);
-      console.log("song.tsx/81\n song.tsx/81\n song.tsx/81\n song.tsx/81")
-    });
-
-    request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE).then((result) => {
-      console.log(result);
-    });
-
-    request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE).then((result) => {
-      console.log(result);
-      if(result == 'granted'){
-        MusicFiles.getAll({
-          id: true,
-          blured : false, // works only when 'cover' is set to true
-          artist : true,
-          duration : true, //default : true
-          cover : true, //default : true,
-          genre : true,
-          title : true,
-          minimumSongDuration : 10000, // get songs bigger than 10000 miliseconds duration,
-        }).then(async (tracks: MusicFile[]) => {
-            console.log('tracks ',tracks);
-            setIsLoading(false);
-            setSongList(tracks);
-
-            await AsyncStorage.setItem("PlayerCauzziTeste3:songList", JSON.stringify(tracks));
-        }).catch((error: any) => {
-            console.log('error: ',error);
-            setIsLoading(false);
-        })
-      }
-    });
-  }, []);
+      console.log('albuns adiquiridos');
+      localScopeSongList = arrayToAdd;
+      setIsLoadingAlbumCovers(false);
+      setSongList(arrayToAdd);
+    }).catch((error: any) => {
+        console.log('error: ',error);
+        setIsLoadingAlbumCovers(false);
+    })
+  }, [])
 
   const playSong = useCallback(async (song: MusicFile): Promise<void> => {
     TrackPlayer.reset();
@@ -134,12 +154,10 @@ const SongProvider: React.FC = ({ children }) => {
     });
 
     TrackPlayer.play(); 
-    console.log("gerar o queueueueuee")
     generateQueue(song);
   }, [TrackPlayer, localScopeSongList]);
   
   const generateQueue = useCallback((song: MusicFile) => {
-    console.log("entrou no generate")
     if(isShuffleActive){
       let songsToAdd: any = [{
         id: String(song.id),
@@ -168,7 +186,6 @@ const SongProvider: React.FC = ({ children }) => {
 
       TrackPlayer.add(songsToAdd);
     }else{
-      // const currentTrack = await TrackPlayer.getCurrentTrack();     // maybe not having this could be a problem in the future (but probably not)
       const index = localScopeSongList.findIndex(s => s.id === song.id);
       
       const songsToAddList = localScopeSongList.map((s, i) => {
@@ -223,7 +240,6 @@ const SongProvider: React.FC = ({ children }) => {
       TrackPlayer, 
       songList, 
       playSong, 
-      refresh, 
       needToRefreshPauseButton, 
       needToRefreshShuffleButton,
       setNeedToRefreshPauseButton, 
@@ -248,3 +264,9 @@ const useSongs = (): SongContextData => {
 }
 
 export { useSongs, SongProvider};
+
+/*
+
+
+
+*/

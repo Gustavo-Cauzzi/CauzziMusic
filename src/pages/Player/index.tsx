@@ -6,7 +6,19 @@ import IconIonicons from 'react-native-vector-icons/Ionicons'
 
 import Slider from '@react-native-community/slider'
 
-import { AlbumCover, ArtistName, Container, CurrentSongPostition, IconContainer, SongDuration, SongTitleTicker, SongTitleContainer, TimeContainer, SongTitle, IconFooter } from './styles';
+import { 
+  AlbumCover, 
+  ArtistName, 
+  Container, 
+  CurrentSongPostition, 
+  IconContainer, 
+  SongDuration, 
+  SongTitleTicker, 
+  SongTitleContainer, 
+  TimeContainer, 
+  SongTitle, 
+  IconFooter 
+} from './styles';
 import { useSongs } from '../../hooks/songs';
 import { useState } from 'react';
 import { EmptyAlbumCover, EmptyTimeContainer } from './emptyPlayerStyles';
@@ -58,6 +70,7 @@ const Player: React.FC = () => {
 
   useEffect(() => {
     TrackPlayer.addEventListener('playback-track-changed', async () => {
+      if (!songList) return;
       const newCurrentTrackId = await TrackPlayer.getCurrentTrack();
       const newCurrentTrack = songList.find(s => s.id == newCurrentTrackId);
 
@@ -274,7 +287,7 @@ const Player: React.FC = () => {
         )
         : (
           <>
-            <EmptyAlbumCover >
+            <EmptyAlbumCover>
               <IconFontisto name="music-note" color="#fff" size={125} style={{ marginLeft: -5 }}/>
             </EmptyAlbumCover>
             <EmptyTimeContainer>

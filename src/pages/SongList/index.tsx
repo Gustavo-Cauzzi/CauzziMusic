@@ -79,7 +79,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
         <SafeAreaView>
         <FlatList
           data={songList}
-          maxToRenderPerBatch={100}
+          maxToRenderPerBatch={30}
           keyExtractor={(song) => String(song.id)}
           getItemLayout={(_, index) => (
             { length: 70, offset: 70 * index, index }
@@ -96,7 +96,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
               }
               <SongInfo>
                 <SongName>{song.title}</SongName>
-                <ArtistName>{song.author}</ArtistName>
+                <ArtistName>{song.author != '<unknown>' ? song.author : 'Desconhecido'}</ArtistName>
               </SongInfo>
               {/* <IconEntypo 
                 name="dots-three-vertical" 
