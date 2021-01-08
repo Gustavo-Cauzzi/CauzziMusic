@@ -54,57 +54,71 @@ const SongProvider: React.FC = ({ children }) => {
   let isShuffleActive = false;
   let localScopeSongList: MusicFile[] = [];
 
-  useEffect(() => {
-    request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE).then((result) => {
-      result != 'granted' ? console.log(result) : null
-    })
-    
-    request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE).then((result) => {
-      if(result == 'granted'){
-        MusicFiles.getAll({
-          cover: false,
-          batchSize: 0,
-          batchNumber: 0,
-          minimumSongDuration: 10000,
-          sortBy: 'TITLE',
-          sortOrder: 'ASC'
-        }).then((result: MusicFilesResult) => {
-          const arrayToAdd = result.results.map((song: any) => {
-            return {
-              ...song,  
-              author: song.artist,
-            }
-          })
-  
-          // console.log(arrayToAdd);
-          console.log('musicas adiquiridas');
 
-          setIsLoading(false);
-          localScopeSongList = arrayToAdd;
-          setSongList(arrayToAdd);
-          handleGetMusicFilesWithCovers();
-        }).catch((error: any) => {
-            console.log('error: ',error);
+  useEffect(() => {
+    if(songList.length == 0){
+      console.log('entrou', songList.length);
+      request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE).then((result) => {
+        result != 'granted' ? console.log(result) : null
+      })
+      
+      request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE).then((result) => {
+        if(result == 'granted'){
+          MusicFiles.getAll({
+            cover: false,
+            batchSize: 0,
+            batchNumber: 0,
+            minimumSongDuration: 10000,
+            sortBy: 'TITLE',
+            sortOrder: 'ASC'
+          }).then((result: MusicFilesResult) => {
+            const arrayToAdd = result.results.map((song: any) => {
+              return {
+                ...song,  
+                author: song.artist,
+              }
+            })
+    
+            // console.log(arrayToAdd);
+            console.log('musicas adiquiridas');
+  
             setIsLoading(false);
-        })
-      }else{
-        console.log(result);
-      }
-    });
+            localScopeSongList = arrayToAdd;
+            setSongList(arrayToAdd);
+            handleGetMusicFilesWithCovers();
+          }).catch((error: any) => {
+              console.log('error: ',error);
+              setIsLoading(false);
+          })
+        }else{
+          console.log(result);
+        }
+      });
+    }
 
     async function setupMusicPlayer(){
       TrackPlayer.setupPlayer().then(async () => {
         TrackPlayer.updateOptions({
+          stopWithApp: true,
           capabilities: [
-              TrackPlayer.CAPABILITY_PLAY,
-              TrackPlayer.CAPABILITY_PAUSE,
-              TrackPlayer.CAPABILITY_STOP
+            TrackPlayer.CAPABILITY_PLAY,
+            TrackPlayer.CAPABILITY_PAUSE,
+            TrackPlayer.CAPABILITY_STOP,
+            TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
+            TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
           ],
           notificationCapabilities: [
-              TrackPlayer.CAPABILITY_PLAY,
-              TrackPlayer.CAPABILITY_PAUSE,
-              TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
-              TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
+            TrackPlayer.CAPABILITY_PLAY,
+            TrackPlayer.CAPABILITY_PAUSE,
+            TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
+            TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
+          ],
+          compactCapabilities : [
+            TrackPlayer.CAPABILITY_PLAY,
+            TrackPlayer.CAPABILITY_PAUSE,
+            TrackPlayer.CAPABILITY_STOP,
+            TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
+            TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS
           ],
         });
       })
@@ -113,6 +127,9 @@ const SongProvider: React.FC = ({ children }) => {
     setupMusicPlayer();
   }, []);
 
+  TrackPlayer.addEventListener('remote-next', async () => {
+    console.log('pauseeee'); 
+  })
   
   const handleGetMusicFilesWithCovers = useCallback(() => {
     MusicFiles.getAll({
@@ -155,7 +172,7 @@ const SongProvider: React.FC = ({ children }) => {
 
     TrackPlayer.play(); 
     generateQueue(song);
-  }, [TrackPlayer, localScopeSongList]);
+  }, [TrackPlayer]);
   
   const generateQueue = useCallback((song: MusicFile) => {
     if(isShuffleActive){
