@@ -66,13 +66,22 @@ const Player: React.FC = () => {
   const [isRepeatActive, setIsRepeatActive] = useState(false);
 
   let isUserSliding = false;
-  const maxSongTitleLenght = 19;
+  const maxSongTitleLenght = 18;
+
+  useEffect(() => {
+    if(currentTrack && songList && currentTrack.cover == undefined){
+      const currentSongRefreshedData = songList.find(s => s.id == currentTrack.id);
+      setCurrentTrack(currentSongRefreshedData);
+    }
+  }, [songList]);
 
   useEffect(() => {
     TrackPlayer.addEventListener('playback-track-changed', async () => {
       if (!songList) return;
       const newCurrentTrackId = await TrackPlayer.getCurrentTrack();
       const newCurrentTrack = songList.find(s => s.id == newCurrentTrackId);
+
+      if (!newCurrentTrack) return;
 
       setCurrentTrack(newCurrentTrack);
     })
@@ -140,7 +149,7 @@ const Player: React.FC = () => {
         album,      
       })
     }
-  }, []);
+  }, [songList]);
 
   const handleSkipBackwards = useCallback(async () => {
     const currentPosition = await TrackPlayer.getPosition();
@@ -171,7 +180,7 @@ const Player: React.FC = () => {
         album,      
       })
     }
-  }, []);
+  }, [songList]);
 
   const handleOnSlidingComplete = useCallback((value: number) => {
     isUserSliding = false;
