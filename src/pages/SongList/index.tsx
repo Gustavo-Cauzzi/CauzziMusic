@@ -69,7 +69,6 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
 
   return (
     <Container>
-      
       <Header>
         <IconFeather name="menu" size={25} color="#FFF" onPress={handleOpenDrawerMenu}/>
         <Title>Lista de Músicas</Title>
@@ -103,7 +102,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
                 size={20} 
                 color="#bbb" 
                 style={{position: 'absolute', right: 10}}
-                onPress={() => {<PopupMenu />}}
+                onPress={() => {}}
               /> */}
             </SongContainer>
           )}

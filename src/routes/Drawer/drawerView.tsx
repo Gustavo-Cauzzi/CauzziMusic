@@ -9,7 +9,7 @@ import { Alert, View } from 'react-native';
 
 const DrawerView: React.FC<DrawerContentComponentProps> = (props) => {
   const [pageSelected, setPageSelected] = useState(0);
-  const { refresh, isLoading } = useSongs();
+  const { isLoading } = useSongs();
 
   useEffect(() => {
     setPageSelected(props.state.index);
@@ -28,7 +28,7 @@ const DrawerView: React.FC<DrawerContentComponentProps> = (props) => {
     Alert.alert('Você tem certeza?','O Aplicativo precisará de em torno de 1~2 minutos para atualizar a sua lista de música. Você tem certeza que deseja executar agora?',[
       {
         text: "Sim",
-        onPress: () => {refresh()},
+        onPress: () => {},
       },
       { 
         text: "Não", 
@@ -79,10 +79,3 @@ const DrawerView: React.FC<DrawerContentComponentProps> = (props) => {
 }
 
 export default DrawerView;
-
-
-{/* <RectButton onPress={() => {props.navigation.navigate('ArtistList')}}>
-  <Text style={{color: "#000"}}>
-    AAAAAAAAAAA
-  </Text>
-</RectButton> */}

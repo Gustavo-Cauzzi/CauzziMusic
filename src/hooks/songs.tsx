@@ -100,12 +100,11 @@ const SongProvider: React.FC = ({ children }) => {
               }
             })
     
-            console.log('musicas adiquiridas');
+            console.log('Songs acquired');
   
             localScopeSongList = arrayToAdd;
             setIsLoading(false);
             setSongList(arrayToAdd);
-
 
             handleGetMusicFilesWithCovers();
           }).catch((error: any) => {
@@ -159,7 +158,7 @@ const SongProvider: React.FC = ({ children }) => {
       sortBy: 'TITLE',
       sortOrder: 'ASC'
     }).then((result: MusicFilesResult) => {
-      console.log('albuns adiquiridos');
+      console.log('Albums acquired');
       let itNeedsToRefreshAlbumArray = false;
 
       result.results.map((song: any) => {
@@ -199,7 +198,6 @@ const SongProvider: React.FC = ({ children }) => {
           }
         })
 
-        // console.log(refreshedSongList)
         setSongList(refreshedSongList);
       }
     }).catch((error: any) => {
@@ -233,22 +231,64 @@ const SongProvider: React.FC = ({ children }) => {
         artwork: song.cover,
       }];
 
-      while(songsToAdd.length < localScopeSongList.length){
-        const randomIndex = Math.floor(Math.random() * localScopeSongList.length);
-        const {id, path, title, author, cover} = localScopeSongList[randomIndex]
-        const currentSong = {
-          id: String(id),
-          url: path,
-          title: title,
-          artist: author,
-          artwork: cover,
-        } 
-        if(!songsToAdd.includes(currentSong)){
-          songsToAdd.push(currentSong);
-        }
-      }
+      // while(songsToAdd.length < localScopeSongList.length){
+      //   const randomIndex = Math.floor(Math.random() * localScopeSongList.length);
+      //   const {id, path, title, author, cover} = localScopeSongList[randomIndex]
+      //   const currentSong = {
+      //     id: String(id),
+      //     url: path,
+      //     title: title,
+      //     artist: author,
+      //     artwork: cover,
+      //   } 
+      //   if(!songsToAdd.includes(currentSong)){
+      //     songsToAdd.push(currentSong);
+      //   }
+      // }
+
+      /*
+
+      yesterday:
+
+      dani california
+
+      i'm made of wax...
+
+      boulevard of broken dreams
+      */
+
+      songsToAdd.push({
+        id: '64280', 
+        url: "/storage/3363-6234/Musics/The Beatles/Yesterday.mp3", 
+        title: 'Yesterday',
+        artist: "The Beatles", 
+        artwork: "file:///storage/emulated/0/.covers/134a4b3274b1c9e908c705ff1ab7ff76", 
+      });
+      songsToAdd.push({
+        id: '136418', 
+        url: "/storage/emulated/0/Music/Red Hot Chili Peppers - Dani California.mp3", 
+        title: 'Dani California',
+        artist: "Red Hot Chili Peppers", 
+        artwork: "file:///storage/emulated/0/.covers/cc3a2ba777862298dec4bd8904701ee8", 
+      });
+      songsToAdd.push({
+        id: '114245', 
+        url: "/storage/emulated/0/Music/A Day to Remember - I m Made of Wax, Larry, What Are You Mad.mp3", 
+        title: "I'm Made of Wax, Larry, What Are You Made Of?",
+        artist: "A Day to Remember", 
+        artwork: "file://file:///storage/emulated/0/.covers/491d29994183949076c881a0e7a7d27d", 
+      });
+      songsToAdd.push({
+        id: '448', 
+        url: "/storage/3363-6234/Musics/Green Day/Boulevard Of Broken Dreams.mp3", 
+        title: 'Boulevard Of Broken Dreams',
+        artist: "Green Day", 
+        artwork: "file://file:///storage/emulated/0/.covers/60d563e1191411a217970a12060144e2", 
+      });
 
       songsToAdd.splice(0, 1);
+      
+      console.log("songsToAdd: ",songsToAdd);
 
       TrackPlayer.add(songsToAdd);
     }else{
