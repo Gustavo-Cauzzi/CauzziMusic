@@ -8,7 +8,7 @@ const Drawer = createDrawerNavigator();
 
 const DrawerRouter: React.FC = () => {
   return (
-    <Drawer.Navigator drawerContent={props => <DrawerView {...props} />}>
+    <Drawer.Navigator initialRouteName='ArtistList' drawerContent={props => <DrawerView {...props} />}>
       <Drawer.Screen name="SongList" component={SongList} />
       <Drawer.Screen name="ArtistList" component={ArtistList} />
     </Drawer.Navigator>

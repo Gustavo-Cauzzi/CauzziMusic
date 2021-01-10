@@ -81,9 +81,6 @@ const Player: React.FC = () => {
       const newCurrentTrackId = await TrackPlayer.getCurrentTrack();
       const newCurrentTrack = songList.find(s => s.id == newCurrentTrackId);
       
-      console.log('songList', songList);
-      console.log('newCurrentTrackId',newCurrentTrackId);
-      console.log('newCurrentTrack',newCurrentTrack);
       if (!newCurrentTrack) return;
 
       setCurrentTrack(newCurrentTrack);

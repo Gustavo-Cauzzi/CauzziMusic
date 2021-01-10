@@ -15,8 +15,18 @@ interface MusicFile{
   path : string
 }
 
+interface getArtistsResult {
+  results: {
+    artist: string,
+    numberOfAlbums: number,
+    numberOfSongs: number,
+  }[],
+  length: number
+}
 interface AlbumCover {
   id: number,
+  artist: string;
+  album: string;
   cover: string | undefined;
 }
 interface MusicFilesResult{
@@ -31,9 +41,20 @@ interface MusicFilesResult{
     title: string
   }[],
 }
+
+interface ArtistList {
+  albums: {
+      album: string | undefined;
+      cover: string | undefined;
+  }[];
+  artist: string;
+  numberOfAlbums: number;
+  numberOfSongs: number;
+};
 interface SongContextData {
   TrackPlayer: any & ITrackPlayer;
   songList: MusicFile[];
+  artistList: ArtistList[];
   playSong(song: MusicFile): void;
   needToRefreshPauseButton: boolean;
   needToRefreshShuffleButton: boolean;
@@ -52,6 +73,7 @@ const SongContext = createContext<SongContextData>({} as SongContextData);
 
 const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
+  const [artistList, setArtistList] = useState<ArtistList[]>([]);
   const [needToRefreshPauseButton, setNeedToRefreshPauseButton] = useState(false);
   const [needToRefreshShuffleButton, setNeedToRefreshShuffleButton] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -100,12 +122,13 @@ const SongProvider: React.FC = ({ children }) => {
               }
             })
     
-            console.log('Songs acquired');
+            console.log('songs.tsx: SongList acquired');
   
             localScopeSongList = arrayToAdd;
             setIsLoading(false);
             setSongList(arrayToAdd);
 
+            handleGetArtistWithRespectiveAlbums();
             handleGetMusicFilesWithCovers();
           }).catch((error: any) => {
               console.log('error: ',error);
@@ -148,6 +171,60 @@ const SongProvider: React.FC = ({ children }) => {
     setupMusicPlayer();
   }, []);
 
+  const handleGetArtistWithRespectiveAlbums = useCallback(() => {
+    MusicFiles.getArtists({
+      sortBy: 'ARTIST',
+      sortOrder: 'ASC'
+    }).then((data: getArtistsResult) => {
+      console.log('songs.tsx: ArtistList Acquired');
+      let processableData = data.results;
+      if(albumsCoverArray.length > 0){
+        let unknownArtistIndex = -1;
+
+        const artistsWithAlbuns = processableData.map((artist, index) => {
+          let indexesAlreadyFound: number[] = [];
+          let albumArray: {
+            album: string | undefined;
+            cover: string | undefined;
+          }[] = [];
+
+          while (true){
+            const newIndex = albumsCoverArray.findIndex((a, i) => a.artist == artist.artist && !indexesAlreadyFound.includes(i));
+
+            if(newIndex != -1){
+              indexesAlreadyFound.push(newIndex);
+
+              albumArray.push({
+                album: albumsCoverArray[newIndex].album,
+                cover: albumsCoverArray[newIndex].cover,
+              })
+            }else{
+              break;
+            }
+          }
+
+          if(artist.artist == '<unknown>'){
+            unknownArtistIndex = index;
+          }
+
+          return {
+            ...artist,
+            albums: albumArray,
+          };
+        })
+
+        if(unknownArtistIndex != -1){
+          const moveUnknownArtist = artistsWithAlbuns[unknownArtistIndex];
+          artistsWithAlbuns.splice(unknownArtistIndex, 1);
+          artistsWithAlbuns.push(moveUnknownArtist);
+        }
+        
+        setArtistList(artistsWithAlbuns);
+      }
+      console.log('songs.tsx: ArtistList Processed');
+    })
+  }, [albumsCoverArray]);
+
   const handleGetMusicFilesWithCovers = useCallback(() => {
     MusicFiles.getAll({
       cover: true,
@@ -158,7 +235,7 @@ const SongProvider: React.FC = ({ children }) => {
       sortBy: 'TITLE',
       sortOrder: 'ASC'
     }).then((result: MusicFilesResult) => {
-      console.log('Albums acquired');
+      console.log('songs.tsx: Albums acquired');
       let itNeedsToRefreshAlbumArray = false;
 
       result.results.map((song: any) => {
@@ -170,6 +247,8 @@ const SongProvider: React.FC = ({ children }) => {
             itNeedsToRefreshAlbumArray = true;
             albumsCoverArray[albumIndex] = {
               id: song.id,
+              artist: song.artist,
+              album: song.album,
               cover: song.cover ? `file://${song.cover}` : undefined,
             }
           }
@@ -177,6 +256,8 @@ const SongProvider: React.FC = ({ children }) => {
           itNeedsToRefreshAlbumArray = true;
           albumsCoverArray.push({
             id: song.id,
+            artist: song.artist,
+            album: song.album,
             cover: song.cover ? `file://${song.cover}` : undefined,
           })
         }
@@ -208,6 +289,8 @@ const SongProvider: React.FC = ({ children }) => {
 
   const playSong = useCallback(async (song: MusicFile): Promise<void> => {
     TrackPlayer.reset();
+
+    console.log("id: ",song.id);
 
     await TrackPlayer.add({
       id: String(song.id),
@@ -304,6 +387,7 @@ const SongProvider: React.FC = ({ children }) => {
     <SongContext.Provider value={{ 
       TrackPlayer, 
       songList, 
+      artistList,
       playSong, 
       needToRefreshPauseButton, 
       needToRefreshShuffleButton,
