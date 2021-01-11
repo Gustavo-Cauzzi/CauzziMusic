@@ -178,6 +178,7 @@ const SongProvider: React.FC = ({ children }) => {
     }).then((data: getArtistsResult) => {
       console.log('songs.tsx: ArtistList Acquired');
       let processableData = data.results;
+
       if(albumsCoverArray.length > 0){
         let unknownArtistIndex = -1;
 
@@ -221,7 +222,11 @@ const SongProvider: React.FC = ({ children }) => {
           artistsWithAlbuns.push(moveUnknownArtist);
         }
         
-        setArtistList(artistsWithAlbuns);
+        const filteredArtistsWithAlbums = artistsWithAlbuns.filter(a => a != undefined);
+
+        // console.log('filteredArtistsWithAlbums: ',filteredArtistsWithAlbums);
+
+        setArtistList(filteredArtistsWithAlbums);
       }
       console.log('songs.tsx: ArtistList Processed');
     })

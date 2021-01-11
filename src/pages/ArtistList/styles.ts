@@ -1,4 +1,5 @@
-import styled from 'styled-components/native';
+import { Platform } from 'react-native';
+import styled, { css } from 'styled-components/native';
 
 export const Container = styled.View`
   flex: 1;
@@ -21,10 +22,6 @@ export const Title = styled.Text`
   font-weight: bold;
 `;
 
-export const Content = styled.View`
-  margin: 15px;
-  align-items: center;
-`;
 
 export const ArtistContainer = styled.View`
   width: 100%;
@@ -66,4 +63,10 @@ export const EmptyAlbumCover = styled.View`
   justify-content: center;
   align-items: center;
   background-color: #252525;
+`;
+
+export const Content = styled.View`
+  margin: 15px;
+  align-items: center;
+  ${ Platform.OS == 'android' ? (css`padding-bottom: 30px `) : null}
 `;

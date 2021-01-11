@@ -8,6 +8,7 @@ import { View } from 'react-native';
 import { ArtistContainer, ArtistInfoContainer, ArtistName, Container, Content, Cover, CoversContainers, EmptyAlbumCover, Header, Title } from './styles';
 import { useSongs } from '../../hooks/songs';
 import { FlatList } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
 interface ArtistListProps {
   navigation?: any;
 }
@@ -19,6 +20,8 @@ interface  Album {
 
 const ArtistList: React.FC<ArtistListProps> = ({ navigation }) => {
   const { artistList } = useSongs();
+
+  // console.log(artistList);
 
   const numberOfCoversPerArtist = [0, 1, 2, 3];
 
@@ -33,8 +36,9 @@ const ArtistList: React.FC<ArtistListProps> = ({ navigation }) => {
         <Title>Lista de Artistas</Title>
         <View style={{width: 25}}/>
       </Header>
-      <Content>
-      <FlatList
+      <SafeAreaView>
+        <Content>
+        <FlatList
           data={artistList}
           maxToRenderPerBatch={30}
           keyExtractor={(_, i) => String(i)}
@@ -77,9 +81,10 @@ const ArtistList: React.FC<ArtistListProps> = ({ navigation }) => {
                 </ArtistName>
               </ArtistInfoContainer>
             </ArtistContainer>
-          )}
-        />
-      </Content>
+            )}
+          />
+        </Content>
+      </SafeAreaView>
     </Container>
   );
 };
