@@ -38,9 +38,9 @@ const ArtistList: React.FC<ArtistListProps> = ({ navigation }) => {
           data={artistList}
           maxToRenderPerBatch={30}
           keyExtractor={(_, i) => String(i)}
-          // getItemLayout={(_, _) => (
-          //   // { length: 70, offset: 70 * index, index }
-          // )}
+          getItemLayout={(_, index) => (
+            { length: 133, offset: 133 * index, index }
+          )}
           renderItem={({item: artist}) => (
             <ArtistContainer>
               <CoversContainers>

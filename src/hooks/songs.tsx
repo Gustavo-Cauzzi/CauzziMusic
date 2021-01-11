@@ -182,26 +182,28 @@ const SongProvider: React.FC = ({ children }) => {
         let unknownArtistIndex = -1;
 
         const artistsWithAlbuns = processableData.map((artist, index) => {
-          let indexesAlreadyFound: number[] = [];
           let albumArray: {
             album: string | undefined;
             cover: string | undefined;
           }[] = [];
 
-          while (true){
-            const newIndex = albumsCoverArray.findIndex((a, i) => a.artist == artist.artist && !indexesAlreadyFound.includes(i));
+          albumArray = findAlbumsOfCertainArtist(artist);
 
-            if(newIndex != -1){
-              indexesAlreadyFound.push(newIndex);
-
-              albumArray.push({
-                album: albumsCoverArray[newIndex].album,
-                cover: albumsCoverArray[newIndex].cover,
+         if(processableData[index + 1]){
+            while(processableData[index + 1].artist.toLowerCase().includes(artist.artist.toLowerCase())){
+              const data = findAlbumsOfCertainArtist(processableData[index + 1]);
+              data.map((newAlbum, index) => {
+                const result = albumArray.findIndex(album => album.album == newAlbum.album);
+                if(result == -1){
+                  albumArray.push(newAlbum);
+                }else{
+                  data.splice(index, 1);
+                }
               })
-            }else{
-              break;
+              
+              processableData.splice(index + 1, 1);
             }
-          }
+         }
 
           if(artist.artist == '<unknown>'){
             unknownArtistIndex = index;
@@ -209,8 +211,8 @@ const SongProvider: React.FC = ({ children }) => {
 
           return {
             ...artist,
-            albums: albumArray,
-          };
+            albums: albumArray
+          }          
         })
 
         if(unknownArtistIndex != -1){
@@ -223,6 +225,31 @@ const SongProvider: React.FC = ({ children }) => {
       }
       console.log('songs.tsx: ArtistList Processed');
     })
+  }, [albumsCoverArray]);
+
+  const findAlbumsOfCertainArtist = useCallback((artist: any) => {
+    let indexesAlreadyFound: number[] = [];
+    let albumArray: {
+      album: string | undefined;
+      cover: string | undefined;
+    }[] = [];
+
+    while (true){
+      const newIndex = albumsCoverArray.findIndex((a, i) => a.artist == artist.artist && !indexesAlreadyFound.includes(i));
+
+      if(newIndex != -1){
+        indexesAlreadyFound.push(newIndex);
+
+        albumArray.push({
+          album: albumsCoverArray[newIndex].album,
+          cover: albumsCoverArray[newIndex].cover,
+        })
+      }else{
+        break;
+      }
+    }
+
+    return albumArray;
   }, [albumsCoverArray]);
 
   const handleGetMusicFilesWithCovers = useCallback(() => {
