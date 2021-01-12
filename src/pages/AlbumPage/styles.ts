@@ -11,14 +11,19 @@ export const AlbumInfoContainer = styled.View`
   height: 300px;
   width: 100%;
   padding: 30px 0px;
-  padding-top: 100px;
+  padding-top: 50px;
 `;
 
 export const AlbumInfo = styled.View`
   flex: 1;
   align-items: center;
-  flex-direction: row;
-  padding-left: 20px;
+  justify-content: center;
+`;
+
+export const Info = styled.View`
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
 `;
 
 export const AlbumCover = styled.Image`
@@ -61,13 +66,16 @@ export const GoBackContainer = styled(RectButton)`
   z-index: 10;
 `;
 
-export const SongContainer = styled(RectButton)`
-  background-color: #1a1a1a;
-  margin: 5px 0;
-  padding: 5px 5px;
+export const SongContainer = styled.View`
+  /* background-color: #151515; */
+  height: 40px;
+  margin: 8px 0;
+  padding: 5px 10px;
   flex-direction: row;
-  border-radius: 5px;
+  /* border-radius: 5px; */
   align-items: center;
+  border-left-width: 2px;  
+  border-left-color: rgba(85, 0, 255, 0.5); 
 `;
 
 export const SongAlbumCover = styled.Image`

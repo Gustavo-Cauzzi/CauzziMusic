@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { PERMISSIONS, request } from 'react-native-permissions';
 import MusicFiles from 'react-native-get-music-files-v3dev-test';
-import TrackPlayer from 'react-native-track-player';
+import TrackPlayer, { play } from 'react-native-track-player';
 import AsyncStorage from '@react-native-community/async-storage';
 interface MusicFile{
   id : number,
@@ -55,7 +55,7 @@ interface SongContextData {
   TrackPlayer: any & ITrackPlayer;
   songList: MusicFile[];
   artistList: ArtistList[];
-  playSong(song: MusicFile): void;
+  playSong(song: MusicFile, playlist?: MusicFile[]): void;
   needToRefreshPauseButton: boolean;
   needToRefreshShuffleButton: boolean;
   setNeedToRefreshPauseButton(value: boolean): void;
@@ -78,6 +78,7 @@ const SongProvider: React.FC = ({ children }) => {
   const [needToRefreshShuffleButton, setNeedToRefreshShuffleButton] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingAlbumCovers, setIsLoadingAlbumCovers] = useState(true);
+  let currentPlaylist: MusicFile[] = [] as MusicFile[];
   let isShuffleActive = false;
   let localScopeSongList: MusicFile[] = [];
   let albumsCoverArray: AlbumCover[] = [];
@@ -224,7 +225,6 @@ const SongProvider: React.FC = ({ children }) => {
         
         const filteredArtistsWithAlbums = artistsWithAlbuns.filter(a => a != undefined);
 
-        // console.log('filteredArtistsWithAlbums: ',filteredArtistsWithAlbums);
 
         setArtistList(filteredArtistsWithAlbums);
       }
@@ -314,10 +314,12 @@ const SongProvider: React.FC = ({ children }) => {
     })
   }, [localScopeSongList, albumsCoverArray])
 
-  const playSong = useCallback(async (song: MusicFile): Promise<void> => {
-    TrackPlayer.reset();
+  const playSong = useCallback(async (song: MusicFile, playlist?: MusicFile[]): Promise<void> => {
+    if (!playlist){
+      currentPlaylist = [];
+    }
 
-    console.log("id: ",song.id);
+    TrackPlayer.reset();
 
     await TrackPlayer.add({
       id: String(song.id),
@@ -328,10 +330,22 @@ const SongProvider: React.FC = ({ children }) => {
     });
 
     TrackPlayer.play(); 
-    generateQueue(song);
+
+    if(playlist){
+      generateQueue(song, playlist);
+    }else{
+      generateQueue(song);
+    }
   }, [TrackPlayer]);
   
-  const generateQueue = useCallback((song: MusicFile) => {
+  const generateQueue = useCallback((song: MusicFile, playlist?: MusicFile[]) => {
+    let playlistToProcess = localScopeSongList;
+
+    if(playlist){
+      playlistToProcess = playlist;
+      currentPlaylist = playlist;
+    }
+
     if(isShuffleActive){
       let songsToAdd: any = [{
         id: String(song.id),
@@ -341,9 +355,9 @@ const SongProvider: React.FC = ({ children }) => {
         artwork: song.cover,
       }];
 
-      while(songsToAdd.length < localScopeSongList.length){
-        const randomIndex = Math.floor(Math.random() * localScopeSongList.length);
-        const {id, path, title, author, cover} = localScopeSongList[randomIndex]
+      while(songsToAdd.length < playlistToProcess.length){
+        const randomIndex = Math.floor(Math.random() * playlistToProcess.length);
+        const {id, path, title, author, cover} = playlistToProcess[randomIndex]
         const currentSong = {
           id: String(id),
           url: path,
@@ -361,9 +375,9 @@ const SongProvider: React.FC = ({ children }) => {
       
       TrackPlayer.add(songsToAdd);
     }else{
-      const index = localScopeSongList.findIndex(s => s.id === song.id);
+      const index = playlistToProcess.findIndex(s => s.id === song.id);
       
-      const songsToAddList = localScopeSongList.map((s, i) => {
+      const songsToAddList = playlistToProcess.map((s, i) => {
         if(i > index){
             return {
             id: String(s.id),
@@ -406,9 +420,16 @@ const SongProvider: React.FC = ({ children }) => {
         await TrackPlayer.remove(filteredIdsToRemoveFromQueue)
       }
 
-      generateQueue(currentTrack);
+      console.log('curentPlaylist: ',currentPlaylist);
+      if(currentPlaylist.length > 0){
+        console.log("resetQueue- There is a playlist Seted")
+        generateQueue(currentTrack, currentPlaylist);
+      }else{
+        console.log("resetQueue- There is NOT a playlist Seted")
+        generateQueue(currentTrack);
+      }
     }
-  }, [TrackPlayer, localScopeSongList]);
+  }, [TrackPlayer, localScopeSongList, currentPlaylist]);
 
   return (
     <SongContext.Provider value={{ 
