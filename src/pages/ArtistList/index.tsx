@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
 
-
 import { View } from 'react-native';
 
 import { ArtistContainer, ArtistInfoContainer, ArtistName, Container, Content, Cover, CoversContainers, EmptyAlbumCover, Header, Title } from './styles';
@@ -21,13 +20,23 @@ interface  Album {
 const ArtistList: React.FC<ArtistListProps> = ({ navigation }) => {
   const { artistList } = useSongs();
 
-  // console.log(artistList);
-
   const numberOfCoversPerArtist = [0, 1, 2, 3];
 
   const handleOpenDrawerMenu = useCallback(() => {
     navigation.openDrawer();
   }, [navigation]);
+
+  const handleGoToArtistPage = useCallback((artist) => {
+
+    const {numberOfAlbums, numberOfSongs, albums} = artist;
+
+    navigation.jumpTo('ArtistPage', {
+      albums,
+      name: artist.artist,
+      numberOfAlbums,
+      numberOfSongs,
+    })
+  }, []);
 
   return (
     <Container>
@@ -46,7 +55,9 @@ const ArtistList: React.FC<ArtistListProps> = ({ navigation }) => {
             { length: 133, offset: 133 * index, index }
           )}
           renderItem={({item: artist}) => (
-            <ArtistContainer>
+            <ArtistContainer
+              onPress={() => {handleGoToArtistPage(artist)}}
+            >
               <CoversContainers>
                 {
                   numberOfCoversPerArtist.map(i => (
@@ -90,20 +101,3 @@ const ArtistList: React.FC<ArtistListProps> = ({ navigation }) => {
 };
 
 export default ArtistList;
-
-{/* <EmptyAlbumCover>
-  <IconFontisto name="music-note" color="#fff" size={20}/>    
-</EmptyAlbumCover> */}
-
-/*
-
-<ArtistContainer>
-  <CoversContainers>
-    
-  </CoversContainers>
-  <ArtistInfoContainer>
-
-  </ArtistInfoContainer>
-</ArtistContainer>
-
-*/

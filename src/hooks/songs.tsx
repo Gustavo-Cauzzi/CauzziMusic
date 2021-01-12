@@ -233,26 +233,21 @@ const SongProvider: React.FC = ({ children }) => {
   }, [albumsCoverArray]);
 
   const findAlbumsOfCertainArtist = useCallback((artist: any) => {
-    let indexesAlreadyFound: number[] = [];
-    let albumArray: {
+    const albumArray: {
       album: string | undefined;
       cover: string | undefined;
     }[] = [];
 
-    while (true){
-      const newIndex = albumsCoverArray.findIndex((a, i) => a.artist == artist.artist && !indexesAlreadyFound.includes(i));
-
-      if(newIndex != -1){
-        indexesAlreadyFound.push(newIndex);
-
-        albumArray.push({
-          album: albumsCoverArray[newIndex].album,
-          cover: albumsCoverArray[newIndex].cover,
-        })
-      }else{
-        break;
+    albumsCoverArray.map(a =>{
+      if(a.artist == artist.artist){
+        if(!albumArray.find(album => album.album == a.album)){
+          albumArray.push({
+            album: a.album,
+            cover: a.cover,
+          });
+        }
       }
-    }
+    });
 
     return albumArray;
   }, [albumsCoverArray]);

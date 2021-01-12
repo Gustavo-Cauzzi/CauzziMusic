@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { RectButton } from 'react-native-gesture-handler';
 import styled, { css } from 'styled-components/native';
 
 export const Container = styled.View`
@@ -23,7 +24,7 @@ export const Title = styled.Text`
 `;
 
 
-export const ArtistContainer = styled.View`
+export const ArtistContainer = styled(RectButton)`
   width: 100%;
   height: 123px;
   margin-bottom: 10px;
