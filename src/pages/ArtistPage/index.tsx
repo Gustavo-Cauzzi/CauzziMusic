@@ -1,7 +1,7 @@
 import { useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Dimensions, Text, View } from 'react-native';
-import { FlatList, ScrollView } from 'react-native-gesture-handler';
+import { Dimensions, View } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
 import IconAntDesing from 'react-native-vector-icons/AntDesign';
 
@@ -63,6 +63,16 @@ const ArtistPage: React.FC<ArtistPageProps> = ({ navigation }) => {
     navigation.goBack();
   }, []);
 
+  const handleGoToAlbum = useCallback((album: Album) => {
+    navigation.navigate('AlbumPage', {
+      album: {
+        name: album.album,
+        cover: album.cover,
+      },
+      artist: currentArtist.name,
+    })
+  }, [currentArtist]);
+
   return (
     <Container>
       {
@@ -100,9 +110,7 @@ const ArtistPage: React.FC<ArtistPageProps> = ({ navigation }) => {
               width: screenWidth,
               height: screenWidth - 40,
               marginTop: 40,
-            }}>
-              
-              </View>
+            }}/>
             <BackgroundColor>
               <ArtistInfo>
                 <ArtistNameContainer>
@@ -138,7 +146,7 @@ const ArtistPage: React.FC<ArtistPageProps> = ({ navigation }) => {
           </>
         )}
         renderItem={({item: album}) => (
-          <AlbumContainer>
+          <AlbumContainer onPress={() => {handleGoToAlbum(album)}}>
             {
               album.cover
                 ? <AlbumCover source={{uri: album.cover}} />

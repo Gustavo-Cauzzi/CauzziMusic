@@ -4,6 +4,7 @@ import SongList from '../../pages/SongList';
 import ArtistList from '../../pages/ArtistList';
 import DrawerView from './drawerView';
 import ArtistPage from '../../pages/ArtistPage';
+import AlbumPage from '../../pages/AlbumPage';
 
 const Drawer = createDrawerNavigator();
 
@@ -13,6 +14,7 @@ const DrawerRouter: React.FC = () => {
       <Drawer.Screen name="SongList" component={SongList} />
       <Drawer.Screen name="ArtistList" component={ArtistList} />
       <Drawer.Screen name="ArtistPage" component={ArtistPage} />
+      <Drawer.Screen name="AlbumPage" component={AlbumPage} />
     </Drawer.Navigator>
   );
 }

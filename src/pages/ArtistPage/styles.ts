@@ -88,7 +88,7 @@ export const EmptyAlbumCover = styled.View`
   z-index: -10;
 `;
 
-export const AlbumContainer = styled.View`
+export const AlbumContainer = styled(RectButton)`
   margin: 5px 5px;
   width: ${(screenWidth - 50) / 2}px;
   height: ${((screenWidth - 50) / 2) + 50}px;
