@@ -15,6 +15,7 @@ import {
   Content,
   GoBackContainer, 
   Info, 
+  ItemDivision, 
   SongAlbumCover, 
   SongAlbumCoverPlaceHolder, 
   SongContainer,
@@ -167,25 +168,27 @@ const AlbumPage: React.FC<AlbumPageProps> = ({ navigation }) => {
           }}
           showsVerticalScrollIndicator={false}
           renderItem={({item: song}) => (
-            <SongContainer key={song.id} >
-              <RectButton onPress={() => {handlePlayMusic(song)}} style={{flex: 1}}>
-                <SongInfo>
-                  {song.title && song.title.length <= maxSongName
-                    ? <SongName>{song.title}</SongName>
-                    : (
-                      <SongNameTicker
-                      duration={15000}
-                      repeatSpacer={50}
-                      marqueeDelay={1000}
-                      >
-                        {song.title}
-                      </SongNameTicker>
-                    )
-                  }
-                  <ArtistName>{song.author != '<unknown>' ? song.author : 'Desconhecido'}</ArtistName>
-                </SongInfo>
-              </RectButton>
-            </SongContainer>
+            <ItemDivision>
+              <SongContainer key={song.id}>
+                <RectButton onPress={() => {handlePlayMusic(song)}} style={{flex: 1}}>
+                  <SongInfo>
+                    {song.title && song.title.length <= maxSongName
+                      ? <SongName>{song.title}</SongName>
+                      : (
+                        <SongNameTicker
+                          duration={15000}
+                          repeatSpacer={50}
+                          marqueeDelay={1000}
+                        >
+                          {song.title}
+                        </SongNameTicker>
+                      )
+                    }
+                    <ArtistName>{song.author != '<unknown>' ? song.author : 'Desconhecido'}</ArtistName>
+                  </SongInfo>
+                </RectButton>
+              </SongContainer>
+            </ItemDivision>
           )}
         />
       </Content>

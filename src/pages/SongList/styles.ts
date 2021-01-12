@@ -21,7 +21,6 @@ export const Header = styled.View`
 `;  
 
 export const MenuButton = styled.TouchableOpacity`
-  /* left: -85px; */
 `;
 
 export const Title = styled.Text`

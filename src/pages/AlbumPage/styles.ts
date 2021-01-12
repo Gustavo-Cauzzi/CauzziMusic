@@ -66,10 +66,16 @@ export const GoBackContainer = styled(RectButton)`
   z-index: 10;
 `;
 
+export const ItemDivision = styled.View`
+  height: 54px;
+  justify-content: center;
+  border-top-width: 2px;
+  border-top-color: #191919; 
+`;
+
 export const SongContainer = styled.View`
   /* background-color: #151515; */
   height: 40px;
-  margin: 8px 0;
   padding: 5px 10px;
   flex-direction: row;
   /* border-radius: 5px; */
@@ -109,7 +115,6 @@ export const SongArtistName = styled.Text`
 
 export const Content = styled.View`
   padding: 0px 10px;
-  margin-bottom: 25px;
 `;
 
 export const SongNameTicker = styled(TextTicker)`
