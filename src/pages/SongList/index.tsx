@@ -1,13 +1,27 @@
 import React, { useCallback } from 'react';
-import { FlatList } from 'react-native';
+import { Alert, FlatList, Text, View } from 'react-native';
 import { useSongs } from '../../hooks/songs';
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
 import IconIonicons from 'react-native-vector-icons/Ionicons';
-// import IconEntypo from 'react-native-vector-icons/Entypo';
+import IconEntypo from 'react-native-vector-icons/Entypo';
 
-import {ArtistName, Container, Content, Header, SongAlbumCover, SongContainer, SongInfo, SongName, Title, SongAlbumCoverPlaceHolder} from './styles';
+import {
+  ArtistName,
+  Container,
+  Content,
+  Header,
+  SongAlbumCover,
+  SongContainer,
+  SongInfo,
+  SongName,
+  Title,
+  SongAlbumCoverPlaceHolder,
+  SongTriger,
+  MenuContainer,
+} from './styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 // import PopupMenu from '../../components/PopupMenu';
 interface MusicFile{
   id : number,
@@ -26,7 +40,7 @@ interface SongListProps {
 }
 
 const SongList: React.FC<SongListProps> = ({ navigation }) => {
-  const {songList, playSong, changeShuffleValue, setNeedToRefreshShuffleButton} = useSongs();
+  const {songList, playSong, changeShuffleValue, setNeedToRefreshShuffleButton, artistList} = useSongs();
 
   const handleOpenDrawerMenu = useCallback(() => {
     navigation.openDrawer()
@@ -67,6 +81,34 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
     })
   }, []);
 
+  const handleGoToAlbum = useCallback((song: MusicFile) => {
+    navigation.navigate('AlbumPage',{
+      album: {
+        name: song.album,
+        cover: song.cover,
+      },
+      artist: song.author,
+    })
+  }, []);
+
+  const handleGoToArtist = useCallback((song: MusicFile) => {
+    const artist = artistList.find(a => a.artist == song.author);
+
+    if(artist){
+      const {numberOfAlbums, numberOfSongs, albums} = artist;
+
+      navigation.jumpTo('ArtistPage', {
+        albums,
+        name: artist.artist,
+        numberOfAlbums,
+        numberOfSongs,
+      });
+    }else{
+      console.log("Artist not found (songList - handleGoToArtist)")
+    }
+
+    }, [artistList]);
+
   return (
     <Container>
       <Header>
@@ -84,26 +126,49 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
             { length: 70, offset: 70 * index, index }
           )}
           renderItem={({item: song}) => (
-            <SongContainer key={song.id} onPress={() => {handlePlayMusic(song)}}>
-              {song.cover 
-                ? <SongAlbumCover source={{uri: `${song.cover}`}}/>
-                : (
-                  <SongAlbumCoverPlaceHolder>
-                    <IconFontisto name="music-note" color="#fff" size={20}/>    
-                  </SongAlbumCoverPlaceHolder>
-                )
-              }
-              <SongInfo>
-                <SongName>{song.title}</SongName>
-                <ArtistName>{song.author != '<unknown>' ? song.author : 'Desconhecido'}</ArtistName>
-              </SongInfo>
-              {/* <IconEntypo 
-                name="dots-three-vertical" 
-                size={20} 
-                color="#bbb" 
-                style={{position: 'absolute', right: 10}}
-                onPress={() => {}}
-              /> */}
+            <SongContainer key={song.id}>
+              <SongTriger onPress={() => {handlePlayMusic(song)}}>
+                {song.cover 
+                  ? <SongAlbumCover source={{uri: `${song.cover}`}}/>
+                  : (
+                    <SongAlbumCoverPlaceHolder>
+                      <IconFontisto name="music-note" color="#fff" size={20}/>    
+                    </SongAlbumCoverPlaceHolder>
+                  )
+                }
+                <SongInfo>
+                  <SongName>{song.title}</SongName>
+                  <ArtistName>{song.author != '<unknown>' ? song.author : 'Desconhecido'}</ArtistName>
+                </SongInfo>
+              </SongTriger>
+                <MenuContainer>
+                  <Menu>
+                    <MenuTrigger>
+                      <IconEntypo 
+                        name="dots-three-vertical" 
+                        size={20} 
+                        color="#bbb" 
+                      />
+                    </MenuTrigger>
+                    <MenuOptions customStyles={{
+                      optionsContainer: {
+                        backgroundColor: '#151515',
+                        width: 150,
+                      },
+                    }}>
+                      <MenuOption onSelect={() => {handleGoToAlbum(song)}}>
+                        <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+                          <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Album </Text>
+                        </View>
+                      </MenuOption>
+                      <MenuOption onSelect={() => {handleGoToArtist(song)}}>
+                      <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+                          <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Artista </Text>
+                        </View>
+                      </MenuOption>
+                    </MenuOptions>
+                  </Menu>
+                </MenuContainer>
             </SongContainer>
           )}
         />

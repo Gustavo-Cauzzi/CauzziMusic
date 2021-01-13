@@ -69,8 +69,8 @@ export const GoBackContainer = styled(RectButton)`
 export const ItemDivision = styled.View`
   height: 54px;
   justify-content: center;
-  border-top-width: 2px;
-  border-top-color: #191919; 
+  border-top-width: 1px;
+  border-top-color: rgba(100, 100, 100, 0.1); 
 `;
 
 export const SongContainer = styled.View`

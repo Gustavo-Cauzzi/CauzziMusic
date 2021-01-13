@@ -29,13 +29,27 @@ export const Title = styled.Text`
   font-weight: bold;
 `;
 
-export const SongContainer = styled(RectButton)`
+export const SongContainer = styled.View`
   background-color: #1a1a1a;
   margin: 5px 0;
+  border-radius: 5px;
+  flex-direction: row;
+`;
+
+export const MenuContainer = styled.View`
+  position: absolute;
+  right: 10px;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+`;
+
+export const SongTriger = styled(RectButton)`
+  flex: 1;
   padding: 5px 5px;
   flex-direction: row;
-  border-radius: 5px;
   align-items: center;
+  margin-right: 35px;
 `;
 
 export const SongInfo = styled.View`
