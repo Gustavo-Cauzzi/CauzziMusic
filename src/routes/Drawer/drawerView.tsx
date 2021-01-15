@@ -25,16 +25,6 @@ const DrawerView: React.FC<DrawerContentComponentProps> = (props) => {
   }, [pageSelected]);
 
   const handleRefreshSongList = useCallback(() => {
-    Alert.alert('Você tem certeza?','O Aplicativo precisará de em torno de 1~2 minutos para atualizar a sua lista de música. Você tem certeza que deseja executar agora?',[
-      {
-        text: "Sim",
-        onPress: () => {},
-      },
-      { 
-        text: "Não", 
-        onPress: () => console.log("Ação Cancelada") 
-      }
-    ])
   }, []);
 
   return (

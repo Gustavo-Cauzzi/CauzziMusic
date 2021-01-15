@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Alert, FlatList, Text, View } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import { useSongs } from '../../hooks/songs';
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
@@ -22,16 +22,15 @@ import {
 } from './styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
-// import PopupMenu from '../../components/PopupMenu';
 interface MusicFile{
   id : number,
   title : string,
   author : string,
   album : string,
   genre : string,
-  duration : number, // miliseconds
+  duration : number, 
   cover :string,
-  blur : string, //Will come null if createBLur is set to false
+  blur : string,
   path : string
 }
 

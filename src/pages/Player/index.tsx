@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect } from 'react';
 import IconFeather from 'react-native-vector-icons/Feather'
@@ -20,19 +21,8 @@ import {
   IconFooter 
 } from './styles';
 import { useSongs } from '../../hooks/songs';
-import { useState } from 'react';
 import { EmptyAlbumCover, EmptyTimeContainer } from './emptyPlayerStyles';
 // import { addEventListener } from 'react-native-track-player';
-interface RouteParams{
-  id: string;
-  title: string;
-  path: string;
-  author: string;
-  cover: string;
-  duration: number;
-  album: string;
-}
-
 interface MusicFile{
   id : number,
   title : string,
@@ -212,14 +202,14 @@ const Player: React.FC = () => {
               currentTrack.cover 
                 ? <AlbumCover source={{uri: currentTrack.cover}}/>
                 : (
-                  <EmptyAlbumCover >
+                  <EmptyAlbumCover>
                     <IconFontisto name="music-note" color="#fff" size={125} style={{ marginLeft: -5 }}/>
                   </EmptyAlbumCover>
                 )
             }
             <SongTitleContainer
-              text={currentTrack.title}
-              maxTextLenght={maxSongTitleLenght}
+              text={currentTrack.title} //needed for calculation on ./styles
+              maxTextLenght={maxSongTitleLenght} //needed for calculation on ./styles
             >
               {
                 currentTrack.title.length > maxSongTitleLenght
