@@ -1,8 +1,8 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
 
-import AppProvider from './hooks';
 import Routes from './routes';
+import AppProvider from './hooks';
 
 const App: React.FC = () => {
   return (
