@@ -1,75 +1,37 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Dimensions, FlatList, Text, View } from 'react-native';
 import { useSongs } from '../../hooks/songs';
-import IconFeather from 'react-native-vector-icons/Feather';
-import IconFontisto from 'react-native-vector-icons/Fontisto';
-import IconIonicons from 'react-native-vector-icons/Ionicons';
+
 import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import IconFontisto from 'react-native-vector-icons/Fontisto';
 import IconEntypo from 'react-native-vector-icons/Entypo';
 
-import {
-  ArtistName,
-  Container,
-  Content,
-  Header,
-  SongAlbumCover,
-  SongContainer,
-  SongInfo,
-  SongName,
-  Title,
-  SongAlbumCoverPlaceHolder,
-  SongTriger,
-  MenuContainer,
-  ShuffleButton,
-  ShuffleIconContainer,
-  ShuffleText,
-} from './styles';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Container, Header, SearchBox, SearchBoxContainer, Title, Content, SongContainer, SongTriger, SongAlbumCover, SongAlbumCoverPlaceHolder, SongInfo, SongName, SongNameTicker, ArtistName, MenuContainer } from './styles';
 import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
-import { SongNameTicker } from '../AlbumPage/styles';
+
 interface MusicFile{
   id : number,
   title : string,
   author : string,
   album : string,
   genre : string,
-  duration : number, 
+  duration : number, // miliseconds
   cover :string,
-  blur : string,
+  blur : string, //Will come null if createBLur is set to false
   path : string
 }
 
-interface SongListProps {
-  navigation?: any;
+interface SearchPageProps {
+  navigation?: any
 }
 
 const screenWidth = Dimensions.get('window').width;
 
-const SongList: React.FC<SongListProps> = ({ navigation }) => {
-  const {songList, playSong, changeShuffleValue, setNeedToRefreshShuffleButton, artistList} = useSongs();
+const SearchPage: React.FC<SearchPageProps> = ({ navigation }) => {
+  const [currentSongList, setCurrentSongList] = useState<MusicFile[]>([]);
+  const [isSearchBoxSelected, setIsSearchBoxSelected] = useState(false);
 
-  const handleOpenDrawerMenu = useCallback(() => {
-    navigation.openDrawer()
-  }, [navigation]);
-
-  const handleIniciateShufflePlaylist = useCallback(() => {
-    const randomIndex = Math.floor(Math.random() * songList.length);
-    playSong(songList[randomIndex]);
-    changeShuffleValue(true);
-    setNeedToRefreshShuffleButton(true);
-
-    const {id, title, path, author, cover, duration, album} = songList[randomIndex];
-    
-    navigation.jumpTo('Player', {
-      id,
-      title,
-      path,
-      author,
-      cover,
-      duration,
-      album,
-    })
-  }, [songList]);
+  const { songList, playSong, artistList } = useSongs();
 
   const handlePlayMusic = useCallback((song: MusicFile) => {
     playSong(song);    
@@ -115,34 +77,33 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
 
   }, [artistList]);
 
-  const handleNavigateToSearchPage = useCallback(() => {
-    navigation.navigate('SearchPage');
-  }, []);
 
   return (
     <Container>
       <Header>
-        <IconFeather name="menu" size={25} color="#FFF" onPress={handleOpenDrawerMenu}/>
-        <Title>Lista de Músicas</Title>
-        <IconMaterialCommunityIcons name="magnify" size={25} color="#fff" onPress={handleNavigateToSearchPage}/>
+        <Title>Buscar Músicas</Title>
       </Header>
       <Content>
-        <SafeAreaView>
+        <SearchBoxContainer
+          isActive={isSearchBoxSelected}
+        >
+          <SearchBox 
+            autoCorrect={false}          
+            onFocus={() => {setIsSearchBoxSelected(true)}}  
+            onBlur={() => {setIsSearchBoxSelected(false)}}  
+            onChangeText={(newValue) => {
+              if(newValue == ''){
+                setCurrentSongList([]);
+              }else{
+                setCurrentSongList(songList.filter(song => song.title.toLowerCase().includes(newValue.toLowerCase())))
+              }
+            }}
+          />
+          <IconMaterialCommunityIcons name="magnify" size={25} color="#fff"/>
+        </SearchBoxContainer>
         <FlatList
-          data={songList}
-          maxToRenderPerBatch={30}
-          keyExtractor={(song) => String(song.id)}
-          getItemLayout={(_, index) => (
-            { length: 70, offset: 70 * index + 1, index }
-          )}
-          ListHeaderComponent={() => (
-            <ShuffleButton onPress={handleIniciateShufflePlaylist}>
-              <ShuffleIconContainer>
-                <IconIonicons name="shuffle" size={27.5} color="#fff"/>
-              </ShuffleIconContainer>
-              <ShuffleText>Aleatório</ShuffleText>
-            </ShuffleButton>
-          )}
+          data={currentSongList}
+          keyExtractor={(item) => String(item.id)}
           renderItem={({item: song}) => (
             <SongContainer key={song.id}>
               <SongTriger onPress={() => {handlePlayMusic(song)}}>
@@ -206,10 +167,9 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
             </SongContainer>
           )}
         />
-        </SafeAreaView>
       </Content>
     </Container>
   );
 };
 
-export default SongList;
+export default SearchPage;

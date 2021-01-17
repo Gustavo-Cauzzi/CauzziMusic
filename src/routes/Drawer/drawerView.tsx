@@ -5,9 +5,13 @@ import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommun
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSongs } from '../../hooks/songs';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 
-const DrawerView: React.FC<DrawerContentComponentProps> = (props) => {
+interface DrawerProps {
+  navigation?: any;
+}
+
+const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({navigation, ...props}) => {
   const [pageSelected, setPageSelected] = useState(0);
   const { isLoading } = useSongs();
 
@@ -18,14 +22,17 @@ const DrawerView: React.FC<DrawerContentComponentProps> = (props) => {
   const handleItemSelected = useCallback((id: number, pageName: string) => {
     if(pageSelected != id){
       setPageSelected(id);
-      props.navigation.navigate(pageName);
+      navigation.navigate(pageName);
     }else{
-      props.navigation.toggleDrawer();
+      navigation.toggleDrawer();
     }
   }, [pageSelected]);
 
-  const handleRefreshSongList = useCallback(() => {
-  }, []);
+  const handleGoToSearchPage = useCallback(() => {
+    console.log('hhsauidhauidhsuia');
+    navigation.toggleDrawer();
+    navigation.navigate('SearchPage');
+  }, [navigation]);
 
   return (
     <Container>
@@ -43,7 +50,7 @@ const DrawerView: React.FC<DrawerContentComponentProps> = (props) => {
 
       </Content>
       <Footer>
-        <FooterItem onPress={() => {}}>
+        <FooterItem onPress={handleGoToSearchPage}>
           <IconMaterialCommunityIcons name="magnify" size={20} color="#d3d3d3" />
           <FooterText>Buscar música</FooterText>
         </FooterItem>
@@ -57,7 +64,7 @@ const DrawerView: React.FC<DrawerContentComponentProps> = (props) => {
             </View>
           )
           : (
-            <FooterItem onPress={handleRefreshSongList}>
+            <FooterItem onPress={() => {}}>
               <IconMaterialIcons name="refresh" size={20} color="#d3d3d3" />
               <FooterText>Atualizar músicas</FooterText>
             </FooterItem>
