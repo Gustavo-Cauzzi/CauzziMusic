@@ -20,3 +20,8 @@ export const Title = styled.Text`
   font-size: 20px;
   font-weight: bold;
 `;
+
+export const Content = styled.View`
+  flex: 1;
+  padding: 20px 10px;
+`;

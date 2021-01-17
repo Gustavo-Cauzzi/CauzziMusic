@@ -1,9 +1,10 @@
 import React, { useCallback } from 'react';
-import { FlatList, Text, View } from 'react-native';
+import { Dimensions, FlatList, Text, View } from 'react-native';
 import { useSongs } from '../../hooks/songs';
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
 import IconIonicons from 'react-native-vector-icons/Ionicons';
+import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import IconEntypo from 'react-native-vector-icons/Entypo';
 
 import {
@@ -19,9 +20,13 @@ import {
   SongAlbumCoverPlaceHolder,
   SongTriger,
   MenuContainer,
+  ShuffleButton,
+  ShuffleIconContainer,
+  ShuffleText,
 } from './styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
+import { SongNameTicker } from '../AlbumPage/styles';
 interface MusicFile{
   id : number,
   title : string,
@@ -37,6 +42,8 @@ interface MusicFile{
 interface SongListProps {
   navigation?: any;
 }
+
+const screenWidth = Dimensions.get('window').width;
 
 const SongList: React.FC<SongListProps> = ({ navigation }) => {
   const {songList, playSong, changeShuffleValue, setNeedToRefreshShuffleButton, artistList} = useSongs();
@@ -113,7 +120,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
       <Header>
         <IconFeather name="menu" size={25} color="#FFF" onPress={handleOpenDrawerMenu}/>
         <Title>Lista de Músicas</Title>
-        <IconIonicons name="shuffle" size={25} color="#fff" onPress={handleIniciateShufflePlaylist}/>
+        <IconMaterialCommunityIcons name="magnify" size={25} color="#fff"/>
       </Header>
       <Content>
         <SafeAreaView>
@@ -122,7 +129,15 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
           maxToRenderPerBatch={30}
           keyExtractor={(song) => String(song.id)}
           getItemLayout={(_, index) => (
-            { length: 70, offset: 70 * index, index }
+            { length: 70, offset: 70 * index + 1, index }
+          )}
+          ListHeaderComponent={() => (
+            <ShuffleButton onPress={handleIniciateShufflePlaylist}>
+              <ShuffleIconContainer>
+                <IconIonicons name="shuffle" size={27.5} color="#fff"/>
+              </ShuffleIconContainer>
+              <ShuffleText>Aleatório</ShuffleText>
+            </ShuffleButton>
           )}
           renderItem={({item: song}) => (
             <SongContainer key={song.id}>
@@ -136,7 +151,23 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
                   )
                 }
                 <SongInfo>
-                  <SongName>{song.title}</SongName>
+                  {
+                    song.title.length < 39
+                      ? <SongName>{song.title}</SongName>
+                      : (
+                        <View
+                          style={{width: screenWidth - 125}}
+                        >
+                          <SongNameTicker
+                            duration={15000}
+                            repeatSpacer={50}
+                            marqueeDelay={1000}
+                          >
+                            {song.title}
+                          </SongNameTicker>
+                        </View>
+                      )
+                  }
                   <ArtistName>{song.author != '<unknown>' ? song.author : 'Desconhecido'}</ArtistName>
                 </SongInfo>
               </SongTriger>

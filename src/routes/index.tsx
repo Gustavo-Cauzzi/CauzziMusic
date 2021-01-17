@@ -13,7 +13,7 @@ const Routes: React.FC = () => {
       <Tab.Navigator tabBarPosition={0}>
         <Tab.Screen name="DrawerRouter" component={DrawerRouter} />
         <Tab.Screen name="Player" component={Player} />
-        <Tab.Screen name="QueuePage" component={QueuePage} />
+        {/* <Tab.Screen name="QueuePage" component={QueuePage} /> */}
       </Tab.Navigator>
     </NavigationContainer>
   )

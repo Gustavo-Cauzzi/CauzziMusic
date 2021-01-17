@@ -1,4 +1,5 @@
 import { RectButton } from 'react-native-gesture-handler';
+import TextTicker from 'react-native-text-ticker';
 import styled from 'styled-components/native';
 
 export const Container = styled.View`
@@ -26,7 +27,7 @@ export const MenuButton = styled.TouchableOpacity`
 export const Title = styled.Text`
   color: #e5e5e5;
   font-size: 20px;
-  font-weight: bold;
+  font-family: 'Roboto Slab Bold';
 `;
 
 export const SongContainer = styled.View`
@@ -63,12 +64,14 @@ export const SongAlbumCover = styled.Image`
 `;
 
 export const SongName = styled.Text`
+  font-family: 'Roboto Slab Regular';
   color: #e5e5e5;
 `;
 
 export const ArtistName = styled.Text`
   color: #a5a5a5;
   font-size: 12px;
+  font-family: 'Karla Regular';
 `;
 
 export const SongAlbumCoverPlaceHolder = styled.View`
@@ -79,4 +82,35 @@ export const SongAlbumCoverPlaceHolder = styled.View`
   justify-content: center;
   align-items: center;
   background-color: #252525;
+`;
+
+export const ShuffleButton = styled(RectButton)`
+  background-color: #1a1a1a;
+  margin: 5px 0;
+  border-radius: 5px;
+  flex-direction: row;
+  height: 60px;
+  align-items: center;
+  padding-left: 10px;
+`
+
+export const ShuffleIconContainer = styled.View`
+  height: 45px;
+  width: 45px;
+  background-color: #580CF0;
+  border-radius: 22.5px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+`;
+
+export const ShuffleText = styled.Text`
+  color: #e5e5e5;
+  font-size: 15px;
+  font-family: 'Roboto Slab SemiBold';
+`;
+
+export const SongNameTicker = styled(TextTicker)`
+  font-family: 'Roboto Slab Regular';
+  color: #e5e5e5;
 `;

@@ -39,6 +39,7 @@
     "@react-native-community/eslint-config": "^1.1.0",
     "@types/jest": "^25.2.3",
     "@types/react-native": "^0.63.2",
+    "@types/react-native-sortable-list": "^0.0.9",
     "@types/react-native-vector-icons": "^6.4.6",
     "@types/react-test-renderer": "^16.9.2",
     "@types/styled-components": "^5.1.4",
@@ -61,5 +62,8 @@
       "json",
       "node"
     ]
+  },
+  "rnpm":{
+    "assets":["./assets/fonts/"]
   }
 }
