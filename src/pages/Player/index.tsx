@@ -78,7 +78,7 @@ const Player: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setCurrentTrack(route.params as MusicFile)
+    setCurrentTrack(route.params as MusicFile);
     setIsPlaying(true);
   }, [route.params]);
 

@@ -3,6 +3,7 @@ import { PERMISSIONS, request } from 'react-native-permissions';
 import MusicFiles from 'react-native-get-music-files-v3dev-test';
 import TrackPlayer from 'react-native-track-player';
 import AsyncStorage from '@react-native-community/async-storage';
+import rnfs from 'react-native-fs';
 interface MusicFile{
   id : number,
   title : string,
@@ -63,6 +64,7 @@ interface SongContextData {
   isShuffleActive: boolean;
   changeShuffleValue(value?: boolean): void;
   isLoading: boolean;
+  deleteSong(song: MusicFile): void;
 }
 
 interface ITrackPlayer{
@@ -123,7 +125,7 @@ const SongProvider: React.FC = ({ children }) => {
               }
             })
     
-            console.log('songs.tsx: SongList acquired',result.results);
+            console.log('songs.tsx: SongList acquired');
   
             localScopeSongList = arrayToAdd;
             setIsLoading(false);
@@ -431,6 +433,36 @@ const SongProvider: React.FC = ({ children }) => {
     }
   }, [TrackPlayer, localScopeSongList, currentPlaylist]);
 
+  const deleteSong = (song: MusicFile) => {
+    console.log("Ação confirmada, deletando música ",song.title);
+
+    rnfs.exists(`file://${song.path}`).then((result) => {
+      console.log("file exists: ", result);
+
+      if(result){
+        return rnfs.unlink(song.path).then(() => {
+          console.log('FILE DELETED');
+          rnfs.scanFile(song.path);
+        })
+        // `unlink` will throw an error, if the item to unlink does not exist
+        .catch((err) => {
+          console.log(err.message);
+        });
+      }else{
+        rnfs.scanFile(song.path);
+      }
+    }).catch((err) => {
+      console.log(err.message);
+    });
+
+    const refreshedSongList = localScopeSongList.filter(s => s.id != song.id);
+    albumsCoverArray = albumsCoverArray.filter(a => a.id != song.id);
+
+    setSongList(refreshedSongList);
+
+    AsyncStorage.setItem("CauzziMusic:AlbumArray", JSON.stringify(albumsCoverArray))
+  };
+
   return (
     <SongContext.Provider value={{ 
       TrackPlayer, 
@@ -443,7 +475,8 @@ const SongProvider: React.FC = ({ children }) => {
       setNeedToRefreshShuffleButton,
       isShuffleActive,
       changeShuffleValue,
-      isLoading
+      isLoading,
+      deleteSong
     }}>
       {children}
     </SongContext.Provider>

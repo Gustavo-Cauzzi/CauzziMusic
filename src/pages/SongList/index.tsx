@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
-import { Dimensions, FlatList, Text, View } from 'react-native';
+import { Alert, Dimensions, FlatList, Text, View, Platform } from 'react-native';
 import { useSongs } from '../../hooks/songs';
+
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
 import IconIonicons from 'react-native-vector-icons/Ionicons';
@@ -46,7 +47,7 @@ interface SongListProps {
 const screenWidth = Dimensions.get('window').width;
 
 const SongList: React.FC<SongListProps> = ({ navigation }) => {
-  const {songList, playSong, changeShuffleValue, setNeedToRefreshShuffleButton, artistList} = useSongs();
+  const {songList, playSong, changeShuffleValue, setNeedToRefreshShuffleButton, artistList, deleteSong} = useSongs();
 
   const handleOpenDrawerMenu = useCallback(() => {
     navigation.openDrawer()
@@ -70,6 +71,27 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
       album,
     })
   }, [songList]);
+
+  const handleDeleteSong = useCallback((song: MusicFile) => {
+    Alert.alert(
+      "Excluir Música",
+      `Você tem certeza que queres excluir a música ${song.title}? ${Platform.OS === 'android' ? '\n\nATENÇÃO: Caso esteja rodando uma versão maior do que o Android 5, não será possível excluir músicas que provém de algum dispositivo externo (Cartão SD). Deseja mesmo continuar?': ''}`,
+      [
+        {
+          text: "Cancelar",
+          onPress: () => console.log("Ação cancelada"),
+          style: "cancel"
+        },
+        { 
+          text: "Sim", 
+          onPress: () => deleteSong(song),
+        }
+      ],
+      { cancelable: false }
+    );
+  }, []);
+
+  
 
   const handlePlayMusic = useCallback((song: MusicFile) => {
     playSong(song);    
@@ -196,8 +218,13 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
                         </View>
                       </MenuOption>
                       <MenuOption onSelect={() => {handleGoToArtist(song)}}>
-                      <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+                        <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
                           <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Artista </Text>
+                        </View>
+                      </MenuOption>
+                      <MenuOption onSelect={() => {handleDeleteSong(song)}}>
+                        <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+                          <Text style={{color: '#e5e5e5', fontSize: 15}}> Excluir música </Text>
                         </View>
                       </MenuOption>
                     </MenuOptions>
