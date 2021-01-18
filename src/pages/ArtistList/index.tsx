@@ -8,6 +8,7 @@ import { ArtistContainer, ArtistInfoContainer, ArtistName, Container, Content, C
 import { useSongs } from '../../hooks/songs';
 import { FlatList } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Artist from '../../components/Artist';
 interface ArtistListProps {
   navigation?: any;
 }
@@ -20,14 +21,11 @@ interface  Album {
 const ArtistList: React.FC<ArtistListProps> = ({ navigation }) => {
   const { artistList } = useSongs();
 
-  const numberOfCoversPerArtist = [0, 1, 2, 3];
-
   const handleOpenDrawerMenu = useCallback(() => {
     navigation.openDrawer();
   }, [navigation]);
 
   const handleGoToArtistPage = useCallback((artist) => {
-
     const {numberOfAlbums, numberOfSongs, albums} = artist;
 
     navigation.jumpTo('ArtistPage', {
@@ -55,43 +53,10 @@ const ArtistList: React.FC<ArtistListProps> = ({ navigation }) => {
             { length: 133, offset: 133 * index, index }
           )}
           renderItem={({item: artist}) => (
-            <ArtistContainer
+            <Artist
+              artist={artist}
               onPress={() => {handleGoToArtistPage(artist)}}
-            >
-              <CoversContainers>
-                {
-                  numberOfCoversPerArtist.map(i => (
-                    artist.albums[i] != undefined
-                      ? (
-                        <Cover 
-                          key={`${artist.artist}${i}`}
-                          source={{uri: `${artist.albums[i].cover}`}} 
-                          style={{
-                            borderTopLeftRadius: i == 0 ? 10 : 0,
-                            borderTopRightRadius: i == 3 ? 10 : 0,
-                          }}
-                        />
-                      )
-                      : (
-                        <EmptyAlbumCover
-                          key={`${artist.artist}${i}`}
-                          style={{
-                            borderTopLeftRadius: i == 0 ? 10 : 0,
-                            borderTopRightRadius: i == 3 ? 10 : 0,
-                          }}
-                        >
-                          <IconFontisto name="music-note" color="#fff" size={20}/>    
-                        </EmptyAlbumCover>
-                      )
-                  ))
-                }
-              </CoversContainers>
-              <ArtistInfoContainer>
-                <ArtistName>
-                  {artist.artist == '<unknown>' ? 'Desconhecido' : artist.artist}
-                </ArtistName>
-              </ArtistInfoContainer>
-            </ArtistContainer>
+            />
             )}
           />
         </Content>
