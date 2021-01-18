@@ -66,7 +66,7 @@ const AlbumPage: React.FC<AlbumPageProps> = ({ navigation }) => {
     setCurrentAlbum(routeParams as Album);
 
     if(routeParams != undefined){
-      const songsFromAlbum = songList.filter(s => s.author.toLowerCase() == routeParams.artist.toLowerCase() && s.album.toLowerCase() == routeParams.album.name!.toLowerCase());
+      const songsFromAlbum = songList.filter(s => s.author.toLowerCase().includes(routeParams.artist.toLowerCase()) && s.album.toLowerCase() == routeParams.album.name!.toLowerCase());
       setCurrentSongs(songsFromAlbum);
     }
   }, [route.params]);

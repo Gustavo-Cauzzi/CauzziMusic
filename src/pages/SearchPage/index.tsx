@@ -120,12 +120,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ navigation }) => {
         </SearchBoxContainer>
 
         <SwitchContainer>
-          {/* <RectButton onPress={() => {console.log('9hduhiusdahuidhsaiu')}}> */}
-            <Switch 
-              options={['Músicas','Artistas']} 
-              onChange={() => {setSearchSongsOrArtist(oldValue => oldValue == 'Songs' ? 'Artists' : 'Songs')}}
-            />
-          {/* </RectButton> */}
+          <Switch 
+            options={['Músicas','Artistas']} 
+            onChange={() => {setSearchSongsOrArtist(oldValue => oldValue == 'Songs' ? 'Artists' : 'Songs')}}
+          />
         </SwitchContainer>
 
         {

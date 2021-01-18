@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { PERMISSIONS, request } from 'react-native-permissions';
 import MusicFiles from 'react-native-get-music-files-v3dev-test';
-import TrackPlayer, { play } from 'react-native-track-player';
+import TrackPlayer from 'react-native-track-player';
 import AsyncStorage from '@react-native-community/async-storage';
 interface MusicFile{
   id : number,
@@ -123,7 +123,7 @@ const SongProvider: React.FC = ({ children }) => {
               }
             })
     
-            console.log('songs.tsx: SongList acquired');
+            console.log('songs.tsx: SongList acquired',result.results);
   
             localScopeSongList = arrayToAdd;
             setIsLoading(false);
