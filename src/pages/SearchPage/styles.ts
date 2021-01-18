@@ -96,6 +96,13 @@ export const ArtistName = styled.Text`
   font-family: 'Karla Regular';
 `;
 
+export const SwitchContainer = styled.View`
+  width: 100%;
+  margin: 5px 0px;
+  justify-content: center;
+  align-items: center;
+`;
+
 export const SearchBoxContainer = styled.View<SearchBoxContainerProps>`
   background-color: #252525;
   width: 100%;
