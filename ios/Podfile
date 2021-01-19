@@ -14,6 +14,8 @@ target 'teste3' do
 
   pod 'RNFS', :path => '../node_modules/react-native-fs'
 
+  pod 'RNFastImage', :path => '../node_modules/react-native-fast-image'
+
   target 'teste3Tests' do
     inherit! :complete
     # Pods for testing
