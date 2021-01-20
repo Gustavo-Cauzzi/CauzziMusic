@@ -4,12 +4,13 @@ import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-m
 import IconEntypo from 'react-native-vector-icons/Entypo';
 
 import { MenuContainer } from './styles';
-import { Alert, Platform, Text, View } from 'react-native';
+import { Alert, Platform, StyleProp, Text, View, ViewStyle } from 'react-native';
 import { useSongs } from '../../hooks/songs';
 
 interface MenuPopupProps {
   navigation?: any;
   song: MusicFile;
+  trigerStyle?: ViewStyle;
 }
 
 interface MusicFile{
@@ -24,7 +25,7 @@ interface MusicFile{
   path : string
 }
 
-const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, song, children }) => {
+const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, song, children, trigerStyle }) => {
   const { artistList, deleteSong } = useSongs();
 
   const handleGoToAlbum = useCallback((song: MusicFile) => {
@@ -78,7 +79,7 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, song, children }) => 
     <MenuContainer>
       <Menu>
         <MenuTrigger>
-          <View style={{height: 60,justifyContent: 'center', alignItems: 'center', width: 30}}>
+          <View style={{justifyContent: 'center', alignItems: 'center', width: 30, ...trigerStyle}} >
             { children }
           </View>
         </MenuTrigger>

@@ -4,18 +4,19 @@ import styled from 'styled-components/native';
 import FastImage from 'react-native-fast-image';
 
 export const SongContainer = styled.View`
-  background-color: #1a1a1a;
-  margin: 5px 0;
-  border-radius: 5px;
+  height: 40px;
+  border-left-width: 2px;  
+  border-left-color: rgba(85, 0, 255, 0.5);
   flex-direction: row;
+  margin: 5px 0px;
 `;
 
-
 export const SongTriger = styled(RectButton)`
-  flex: 1;
-  padding: 5px 5px;
   flex-direction: row;
+  padding: 0px 10px;
   align-items: center;
+  flex: 1;
+  align-self: stretch;
 `;
 
 export const SongInfo = styled.View`

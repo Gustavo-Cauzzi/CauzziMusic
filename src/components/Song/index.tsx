@@ -1,13 +1,16 @@
 import React, { useCallback } from 'react';
-import { Dimensions, View } from 'react-native';
-
+import { Dimensions, Image, View } from 'react-native';
+import rnfs from 'react-native-fs';
 import IconEntypo from 'react-native-vector-icons/Entypo';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
 import { useSongs } from '../../hooks/songs';
 
 import MenuPopup from '../MenuPopup';
 
+import NoCoverJpg from '../../../assets/30x30.jpg';
+
 import { SongInfo, ArtistName, SongAlbumCover, SongAlbumCoverPlaceHolder, SongContainer, SongName, SongNameTicker, SongTriger } from './styles';
+import FastImage from 'react-native-fast-image';
 
 interface SongProps {
   onPress?: () => void;
@@ -26,8 +29,6 @@ interface MusicFile{
   path : string
 }
 
-const screenWidth = Dimensions.get('window').width;
-
 const Song: React.FC<SongProps> = ({onPress, song}) => {
  
   const handlePlayMusic = useCallback(() => {
@@ -37,35 +38,12 @@ const Song: React.FC<SongProps> = ({onPress, song}) => {
   return (
     <SongContainer>
       <SongTriger onPress={() => {handlePlayMusic()}}>
-        {song.cover 
-          ? <SongAlbumCover source={{uri: `${song.cover}`}}/>
-          : (
-            <SongAlbumCoverPlaceHolder>
-              <IconFontisto name="music-note" color="#fff" size={20}/>    
-            </SongAlbumCoverPlaceHolder>
-          )
-        }
-        <SongInfo>
-          {
-            song.title.length < 39
-              ? <SongName>{song.title}</SongName>
-              : (
-                <View
-                  style={{width: screenWidth - 125}}
-                >
-                  <SongNameTicker
-                    duration={15000}
-                    repeatSpacer={50}
-                    marqueeDelay={1000}
-                  >
-                    {song.title}
-                  </SongNameTicker>
-                </View>
-              )
-          }
-          <ArtistName>{song.author != '<unknown>' ? song.author : 'Desconhecido'}</ArtistName>
-        </SongInfo>
-      </SongTriger>
+        <FastImage source={NoCoverJpg} style={{width: 30, height: 30, marginRight: 10}} />
+        <View>
+          <SongName>{song.title}</SongName>
+          <ArtistName>{song.author}</ArtistName>
+        </View>
+        </SongTriger>
         <MenuPopup song={song}>
           <IconEntypo 
             name="dots-three-vertical" 
@@ -73,7 +51,7 @@ const Song: React.FC<SongProps> = ({onPress, song}) => {
             color="#bbb" 
           />
         </MenuPopup>
-    </SongContainer>
+      </SongContainer>
   );
 };
 

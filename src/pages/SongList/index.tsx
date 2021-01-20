@@ -66,7 +66,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
           maxToRenderPerBatch={30}
           keyExtractor={(song) => String(song.id)}
           getItemLayout={(_, index) => (
-            { length: 70, offset: 70 * index + 1, index }
+            { length: 50, offset: 50 * index + 1, index }
           )}
           ListHeaderComponent={() => (
             <ShuffleButton onPress={handleIniciateShufflePlaylist}>
