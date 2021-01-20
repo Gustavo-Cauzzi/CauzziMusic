@@ -14,6 +14,7 @@ import {
   ShuffleButton,
   ShuffleIconContainer,
   ShuffleText,
+  ShuffleContainer,
 } from './styles';
 import Song from '../../components/Song';
 import { useSongs } from '../../hooks/songs';
@@ -66,19 +67,22 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
           maxToRenderPerBatch={30}
           keyExtractor={(song) => String(song.id)}
           getItemLayout={(_, index) => (
-            { length: 50, offset: 50 * index + 1, index }
+            { length: 60, offset: (60 * index) + 70, index }
           )}
           ListHeaderComponent={() => (
-            <ShuffleButton onPress={handleIniciateShufflePlaylist}>
-              <ShuffleIconContainer>
-                <IconIonicons name="shuffle" size={27.5} color="#fff"/>
-              </ShuffleIconContainer>
-              <ShuffleText>Aleatório</ShuffleText>
-            </ShuffleButton>
+            <ShuffleContainer>
+              <ShuffleButton onPress={handleIniciateShufflePlaylist}>
+                <ShuffleIconContainer>
+                  <IconIonicons name="shuffle" size={25} color="#fff"/>
+                </ShuffleIconContainer>
+                <ShuffleText>Aleatório</ShuffleText>
+              </ShuffleButton>
+            </ShuffleContainer>
           )}
           renderItem={({item: song}) => (
             <Song 
               song={song}
+              navigation={navigation}
               onPress={() => {
                 playSong(song);    
 

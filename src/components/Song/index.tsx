@@ -1,20 +1,18 @@
-import React, { useCallback } from 'react';
-import { Dimensions, Image, View } from 'react-native';
-import rnfs from 'react-native-fs';
+import React, { PureComponent } from 'react';
+import { View } from 'react-native';
 import IconEntypo from 'react-native-vector-icons/Entypo';
-import IconFontisto from 'react-native-vector-icons/Fontisto';
-import { useSongs } from '../../hooks/songs';
 
 import MenuPopup from '../MenuPopup';
 
 import NoCoverJpg from '../../../assets/30x30.jpg';
 
-import { SongInfo, ArtistName, SongAlbumCover, SongAlbumCoverPlaceHolder, SongContainer, SongName, SongNameTicker, SongTriger } from './styles';
+import { ArtistName, SongContainer, SongName, SongTriger } from './styles';
 import FastImage from 'react-native-fast-image';
 
 interface SongProps {
   onPress?: () => void;
   song: MusicFile;
+  navigation?: any;
 }
 
 interface MusicFile{
@@ -29,30 +27,60 @@ interface MusicFile{
   path : string
 }
 
-const Song: React.FC<SongProps> = ({onPress, song}) => {
- 
-  const handlePlayMusic = useCallback(() => {
+
+export default class Song extends PureComponent<SongProps> {
+  handlePlayMusic(){  
+    const { onPress } = this.props;
     onPress && onPress();
-  }, []);
+  }
   
-  return (
-    <SongContainer>
-      <SongTriger onPress={() => {handlePlayMusic()}}>
-        <FastImage source={NoCoverJpg} style={{width: 30, height: 30, marginRight: 10}} />
-        <View>
-          <SongName>{song.title}</SongName>
-          <ArtistName>{song.author}</ArtistName>
-        </View>
+  render() {
+    const { song, navigation } = this.props;
+    return(
+      <SongContainer>
+        <SongTriger onPress={() => {this.handlePlayMusic()}}>
+          <FastImage source={song.cover ? { uri: song.cover } : NoCoverJpg} style={{width: 40, height: 40, marginRight: 10}} />
+          <View>
+            <SongName>{song.title}</SongName>
+            <ArtistName>{song.author}</ArtistName>
+          </View>
         </SongTriger>
-        <MenuPopup song={song}>
+        <MenuPopup song={song} navigation={navigation}>
           <IconEntypo 
             name="dots-three-vertical" 
             size={20} 
             color="#bbb" 
-          />
+            />
         </MenuPopup>
       </SongContainer>
-  );
-};
+    )
+  }
+}
 
-export default Song;
+// const Song: React.FC<SongProps> = ({onPress, song}) => {
+ 
+//   const handlePlayMusic = useCallback(() => {
+//     onPress && onPress();
+//   }, []);
+  
+//   return (
+//     <SongContainer>
+//       <SongTriger onPress={() => {handlePlayMusic()}}>
+//         <FastImage source={song.cover ? { uri: song.cover } : NoCoverJpg} style={{width: 30, height: 30, marginRight: 10}} />
+//         <View>
+//           <SongName>{song.title}</SongName>
+//           <ArtistName>{song.author}</ArtistName>
+//         </View>
+//       </SongTriger>
+//       <MenuPopup song={song}>
+//         <IconEntypo 
+//           name="dots-three-vertical" 
+//           size={20} 
+//           color="#bbb" 
+//         />
+//       </MenuPopup>
+//     </SongContainer>
+//   );
+// };
+
+// export default Song;

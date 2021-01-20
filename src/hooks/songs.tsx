@@ -116,7 +116,7 @@ const SongProvider: React.FC = ({ children }) => {
 
               return {
                 ...song,  
-                author: song.artist,
+                author: song.artist == '<unknown>' ? 'Desconhecido' : song.artist,
                 cover: albumIndex != -1 
                         ?  albumsCoverArray[albumIndex].cover != undefined
                           ?  `file://${albumsCoverArray[albumIndex].cover}`

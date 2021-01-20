@@ -31,20 +31,23 @@ export const Title = styled.Text`
 `;
 
 export const ShuffleButton = styled(RectButton)`
-  background-color: #1a1a1a;
-  margin: 5px 0;
-  border-radius: 5px;
+  flex: 1;
   flex-direction: row;
-  height: 60px;
   align-items: center;
   padding-left: 10px;
 `
 
+export const ShuffleContainer = styled.View`
+  margin: 5px 0;
+  height: 50px;
+  border-left-width: 2px;
+  border-left-color: rgba(85, 0, 255, 0.5);
+`;
+
 export const ShuffleIconContainer = styled.View`
-  height: 45px;
-  width: 45px;
-  background-color: #580CF0;
-  border-radius: 22.5px;
+  height: 40px;
+  width: 40px;
+  background-color: rgba(85, 0, 255, 0.8);
   align-items: center;
   justify-content: center;
   margin-right: 15px;
