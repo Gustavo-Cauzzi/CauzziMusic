@@ -22,6 +22,7 @@ import {
 } from './styles';
 import { useSongs } from '../../hooks/songs';
 import { EmptyAlbumCover, EmptyTimeContainer } from './emptyPlayerStyles';
+import { AppState } from 'react-native';
 // import { addEventListener } from 'react-native-track-player';
 interface MusicFile{
   id : number,
@@ -58,14 +59,26 @@ const Player: React.FC = () => {
   let isUserSliding = false;
   const maxSongTitleLenght = 18;
 
+
   useEffect(() => {
     if(currentTrack && songList && currentTrack.cover == undefined){
       const currentSongRefreshedData = songList.find(s => s.id == currentTrack.id);
       setCurrentTrack(currentSongRefreshedData);
-    }
+    } 
+    // The app didn't had the covers (like on the first run of the app) but suddenly it was all founded. This Effect will run to make
+    // sure that it will refresh the cover in the player page :)
   }, [songList]);
 
   useEffect(() => {
+    AppState.addEventListener('change', async (nextState) => {
+      if(AppState.currentState.match(/inactive|background/) && nextState === 'active'){
+        const newSongId = await TrackPlayer.getCurrentTrack();
+        if (currentTrack && currentTrack.id == newSongId) return;
+        const newSong = songList.find(s => s.id == newSongId);
+        setCurrentTrack(newSong);
+      }
+    })
+
     TrackPlayer.addEventListener('playback-track-changed', async () => {
       if (!songList) return;
       const newCurrentTrackId = await TrackPlayer.getCurrentTrack();
@@ -74,7 +87,7 @@ const Player: React.FC = () => {
       if (!newCurrentTrack) return;
 
       setCurrentTrack(newCurrentTrack);
-    })
+    });
   }, []);
 
   useEffect(() => {

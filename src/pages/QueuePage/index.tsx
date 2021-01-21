@@ -14,6 +14,13 @@ interface QueueSong {
   url: string;
 }
 
+/*
+
+  Queue page currently in stand by...
+  making tests to implement the queuePage with a SortableList (fun)
+
+*/
+
 const QueuePage: React.FC = () => {
   const [currentQueue, setCurrentQueue] = useState<QueueSong[]>([]);
  

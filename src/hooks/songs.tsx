@@ -76,6 +76,7 @@ const SongContext = createContext<SongContextData>({} as SongContextData);
 const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
   const [artistList, setArtistList] = useState<ArtistList[]>([]);
+  const [albumCoversFromStorage, setAlbumCoversFromStorage] = useState<AlbumCover[]>([]);
   const [needToRefreshPauseButton, setNeedToRefreshPauseButton] = useState(false);
   const [needToRefreshShuffleButton, setNeedToRefreshShuffleButton] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -90,6 +91,7 @@ const SongProvider: React.FC = ({ children }) => {
 
     if(albumArrayFromStorage){
       albumsCoverArray = JSON.parse(albumArrayFromStorage);
+      setAlbumCoversFromStorage(JSON.parse(albumArrayFromStorage))
     }
   }
 
@@ -294,6 +296,7 @@ const SongProvider: React.FC = ({ children }) => {
 
       if(itNeedsToRefreshAlbumArray){
         AsyncStorage.setItem("CauzziMusic:AlbumArray", JSON.stringify(albumsCoverArray))
+        setAlbumCoversFromStorage(albumsCoverArray);
 
         const refreshedSongList: any = localScopeSongList.map(s => {
           const index = albumsCoverArray.findIndex(a => a.id == s.id);  
@@ -422,18 +425,15 @@ const SongProvider: React.FC = ({ children }) => {
         await TrackPlayer.remove(filteredIdsToRemoveFromQueue)
       }
 
-      console.log('curentPlaylist: ',currentPlaylist);
       if(currentPlaylist.length > 0){
-        console.log("resetQueue- There is a playlist Seted")
         generateQueue(currentTrack, currentPlaylist);
       }else{
-        console.log("resetQueue- There is NOT a playlist Seted")
         generateQueue(currentTrack);
       }
     }
   }, [TrackPlayer, localScopeSongList, currentPlaylist]);
 
-  const deleteSong = (song: MusicFile) => {
+  const deleteSong = useCallback((song: MusicFile) => {
     console.log("Ação confirmada, deletando música ",song.title);
 
     rnfs.exists(`file://${song.path}`).then((result) => {
@@ -443,9 +443,7 @@ const SongProvider: React.FC = ({ children }) => {
         return rnfs.unlink(song.path).then(() => {
           console.log('FILE DELETED');
           rnfs.scanFile(song.path);
-        })
-        // `unlink` will throw an error, if the item to unlink does not exist
-        .catch((err) => {
+        }).catch((err) => {
           console.log(err.message);
         });
       }else{
@@ -455,13 +453,14 @@ const SongProvider: React.FC = ({ children }) => {
       console.log(err.message);
     });
 
-    const refreshedSongList = localScopeSongList.filter(s => s.id != song.id);
-    albumsCoverArray = albumsCoverArray.filter(a => a.id != song.id);
+    const refreshedSongList = songList.filter(s => s.id != song.id);
+    const refreshedAlbumList = albumCoversFromStorage.filter(a => a.id != song.id);
 
     setSongList(refreshedSongList);
+    setAlbumCoversFromStorage(refreshedAlbumList);
 
-    AsyncStorage.setItem("CauzziMusic:AlbumArray", JSON.stringify(albumsCoverArray))
-  };
+    AsyncStorage.setItem("CauzziMusic:AlbumArray", JSON.stringify(refreshedAlbumList))
+  }, [songList, albumCoversFromStorage]);
 
   return (
     <SongContext.Provider value={{ 

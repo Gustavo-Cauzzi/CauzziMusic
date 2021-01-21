@@ -50,7 +50,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ navigation }) => {
   const [isSearchBoxSelected, setIsSearchBoxSelected] = useState(false);
   const [searchSongsOrArtist, setSearchSongsOrArtist] = useState<'Songs' | 'Artists'>('Songs');
 
-  const { songList, playSong, artistList } = useSongs();
+  const { songList, playSong, artistList, deleteSong } = useSongs();
 
   const handlePlayMusic = useCallback((song: MusicFile) => {
     playSong(song);    
@@ -109,6 +109,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ navigation }) => {
                 keyExtractor={(item) => String(item.id)}
                 renderItem={({item: song}) => (
                   <Song 
+                    deleteSong={deleteSong}
+                    artistList={artistList}
                     song={song} 
                     onPress={() => handlePlayMusic(song)}
                   />

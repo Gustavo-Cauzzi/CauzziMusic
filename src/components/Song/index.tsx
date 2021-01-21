@@ -14,7 +14,7 @@ interface SongProps {
   song: MusicFile;
   navigation?: any;
   artistList: ArtistList[];
-  deleteSong(song: MusicFile): void;
+  deleteSong: (song: MusicFile) => void;
 }
 
 interface ArtistList {
