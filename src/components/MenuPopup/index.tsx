@@ -9,8 +9,19 @@ interface MenuPopupProps {
   navigation?: any;
   song: MusicFile;
   trigerStyle?: ViewStyle;
+  artistList: ArtistList[];
+  deleteSong(song: MusicFile): void;
 }
 
+interface ArtistList {
+  albums: {
+      album: string | undefined;
+      cover: string | undefined;
+  }[];
+  artist: string;
+  numberOfAlbums: number;
+  numberOfSongs: number;
+};
 interface MusicFile{
   id : number,
   title : string,
@@ -122,8 +133,7 @@ export class MenuPopup extends PureComponent<MenuPopupProps> {
   }
 
   handleGoToArtist(song: MusicFile){
-    const { navigation } = this.props;
-    const { artistList } = useSongs();
+    const { navigation, artistList } = this.props;
 
     const artist = artistList.find(a => a.artist == song.author);
 
@@ -142,7 +152,7 @@ export class MenuPopup extends PureComponent<MenuPopupProps> {
   }
 
   handleDeleteSong(song: MusicFile){
-    const { deleteSong } = useSongs();
+    const { deleteSong } = this.props;
 
     Alert.alert(
       "Excluir Música",

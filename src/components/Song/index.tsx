@@ -13,8 +13,19 @@ interface SongProps {
   onPress?: () => void;
   song: MusicFile;
   navigation?: any;
+  artistList: ArtistList[];
+  deleteSong(song: MusicFile): void;
 }
 
+interface ArtistList {
+  albums: {
+      album: string | undefined;
+      cover: string | undefined;
+  }[];
+  artist: string;
+  numberOfAlbums: number;
+  numberOfSongs: number;
+};
 interface MusicFile{
   id : number,
   title : string,
@@ -35,7 +46,7 @@ export default class Song extends PureComponent<SongProps> {
   }
   
   render() {
-    const { song, navigation } = this.props;
+    const { song, navigation, artistList, deleteSong } = this.props;
     return(
       <SongContainer>
         <SongTriger onPress={() => {this.handlePlayMusic()}}>
@@ -45,7 +56,7 @@ export default class Song extends PureComponent<SongProps> {
             <ArtistName>{song.author}</ArtistName>
           </View>
         </SongTriger>
-        <MenuPopup song={song} navigation={navigation}>
+        <MenuPopup song={song} navigation={navigation} artistList={artistList} deleteSong={deleteSong}>
           <IconEntypo 
             name="dots-three-vertical" 
             size={20} 
