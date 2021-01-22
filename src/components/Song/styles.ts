@@ -1,4 +1,3 @@
-import { RectButton } from 'react-native-gesture-handler';
 import TextTicker from 'react-native-text-ticker';
 import styled from 'styled-components/native';
 import FastImage from 'react-native-fast-image';
@@ -11,12 +10,10 @@ export const SongContainer = styled.View`
   margin: 5px 0px;
 `;
 
-export const SongTriger = styled(RectButton)`
+export const SongTriger = styled.View`
   flex-direction: row;
-  padding: 0px 10px;
   align-items: center;
   flex: 1;
-  align-self: stretch;
 `;
 
 export const SongName = styled.Text`
