@@ -29,8 +29,6 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
     playSong,
     changeShuffleValue,
     setNeedToRefreshShuffleButton,
-    artistList,
-    deleteSong
   } = useSongs();
 
   const handleOpenDrawerMenu = useCallback(() => {
@@ -90,8 +88,6 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
             <Song 
               song={song}
               navigation={navigation}
-              artistList={artistList}
-              deleteSong={deleteSong}
               onPress={() => {
                 playSong(song);    
 

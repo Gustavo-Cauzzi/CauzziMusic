@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, useCallback } from 'react';
 import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 
 import { MenuContainer } from './styles';
@@ -9,8 +9,7 @@ interface MenuPopupProps {
   navigation?: any;
   song: MusicFile;
   trigerStyle?: ViewStyle;
-  artistList: ArtistList[];
-  deleteSong(song: MusicFile): void;
+  children?: any;
 }
 
 interface ArtistList {
@@ -34,95 +33,10 @@ interface MusicFile{
   path : string
 }
 
-// const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, song, children, trigerStyle }) => {
-//   const { artistList, deleteSong } = useSongs();
+const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, song, children, trigerStyle }) => {
+  const { artistList, deleteSong } = useSongs();
 
-//   const handleGoToAlbum = useCallback((song: MusicFile) => {
-//     navigation.navigate('AlbumPage',{
-//       album: {
-//         name: song.album,
-//         cover: song.cover,
-//       },
-//       artist: song.author,
-//     })
-//   }, []);
-
-//   const handleGoToArtist = useCallback((song: MusicFile) => {
-//     const artist = artistList.find(a => a.artist == song.author);
-
-//     if(artist){
-//       const {numberOfAlbums, numberOfSongs, albums} = artist;
-
-//       navigation.jumpTo('ArtistPage', {
-//         albums,
-//         name: artist.artist,
-//         numberOfAlbums,
-//         numberOfSongs,
-//       });
-//     }else{
-//       console.log("Artist not found (songList - handleGoToArtist)")
-//     }
-
-//   }, [artistList]);
-
-//   const handleDeleteSong = useCallback((song: MusicFile) => {
-//     Alert.alert(
-//       "Excluir Música",
-//       `Você tem certeza que queres excluir a música ${song.title}? ${Platform.OS === 'android' ? '\n\nATENÇÃO: Caso esteja rodando uma versão maior do que o Android 5, não será possível excluir músicas que provém de algum dispositivo externo (Cartão SD). Deseja mesmo continuar?': ''}`,
-//       [
-//         {
-//           text: "Cancelar",
-//           onPress: () => console.log("Ação cancelada"),
-//           style: "cancel"
-//         },
-//         { 
-//           text: "Sim", 
-//           onPress: () => deleteSong(song),
-//         }
-//       ],
-//       { cancelable: false }
-//     );
-//   }, []);
-  
-//   return (
-//     <MenuContainer>
-//       <Menu>
-//         <MenuTrigger>
-//           <View style={{justifyContent: 'center', alignItems: 'center', width: 30, ...trigerStyle}} >
-//             { children }
-//           </View>
-//         </MenuTrigger>
-//         <MenuOptions customStyles={{
-//           optionsContainer: {
-//             backgroundColor: '#151515',
-//             width: 150,
-//           },
-//         }}>
-//           <MenuOption onSelect={() => {handleGoToAlbum(song)}}>
-//             <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
-//               <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Album </Text>
-//             </View>
-//           </MenuOption>
-//           <MenuOption onSelect={() => {handleGoToArtist(song)}}>
-//             <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
-//               <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Artista </Text>
-//             </View>
-//           </MenuOption>
-//           <MenuOption onSelect={() => {handleDeleteSong(song)}}>
-//             <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
-//               <Text style={{color: '#e5e5e5', fontSize: 15}}> Excluir música </Text>
-//             </View>
-//           </MenuOption>
-//         </MenuOptions>
-//       </Menu>
-//     </MenuContainer>
-//   );
-// };
-
-export class MenuPopup extends PureComponent<MenuPopupProps> {
-  handleGoToAlbum(song: MusicFile){
-    const { navigation } = this.props;
-
+  const handleGoToAlbum = useCallback((song: MusicFile) => {
     navigation.navigate('AlbumPage',{
       album: {
         name: song.album,
@@ -130,11 +44,9 @@ export class MenuPopup extends PureComponent<MenuPopupProps> {
       },
       artist: song.author,
     })
-  }
+  }, []);
 
-  handleGoToArtist(song: MusicFile){
-    const { navigation, artistList } = this.props;
-
+  const handleGoToArtist = useCallback((song: MusicFile) => {
     const artist = artistList.find(a => a.artist == song.author);
 
     if(artist){
@@ -149,11 +61,10 @@ export class MenuPopup extends PureComponent<MenuPopupProps> {
     }else{
       console.log("Artist not found (songList - handleGoToArtist)")
     }
-  }
 
-  handleDeleteSong(song: MusicFile){
-    const { deleteSong } = this.props;
+  }, [artistList]);
 
+  const handleDeleteSong = useCallback((song: MusicFile) => {
     Alert.alert(
       "Excluir Música",
       `Você tem certeza que queres excluir a música ${song.title}? ${Platform.OS === 'android' ? '\n\nATENÇÃO: Caso esteja rodando uma versão maior do que o Android 5, não será possível excluir músicas que provém de algum dispositivo externo (Cartão SD). Deseja mesmo continuar?': ''}`,
@@ -170,44 +81,132 @@ export class MenuPopup extends PureComponent<MenuPopupProps> {
       ],
       { cancelable: false }
     );
-  }
-
-  render(){
-    const { children, trigerStyle, song } = this.props;
-    return (
-      <MenuContainer>
+  }, []);
+  
+  return (
+    <MenuContainer>
       <Menu>
-          <MenuTrigger>
-            <View style={{justifyContent: 'center', alignItems: 'center', width: 30, ...trigerStyle}} >
-              { children }
+        <MenuTrigger>
+          <View style={{justifyContent: 'center', alignItems: 'center', width: 30, ...trigerStyle}} >
+            { children }
+          </View>
+        </MenuTrigger>
+        <MenuOptions customStyles={{
+          optionsContainer: {
+            backgroundColor: '#151515',
+            width: 150,
+          },
+        }}>
+          <MenuOption onSelect={() => {handleGoToAlbum(song)}}>
+            <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+              <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Album </Text>
             </View>
-          </MenuTrigger>
-          <MenuOptions customStyles={{
-            optionsContainer: {
-              backgroundColor: '#151515',
-              width: 150,
-            },
-          }}>
-            <MenuOption onSelect={() => {this.handleGoToAlbum(song)}}>
-              <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
-                <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Album </Text>
-              </View>
-            </MenuOption>
-            <MenuOption onSelect={() => {this.handleGoToArtist(song)}}>
-              <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
-                <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Artista </Text>
-              </View>
-            </MenuOption>
-            <MenuOption onSelect={() => {this.handleDeleteSong(song)}}>
-              <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
-                <Text style={{color: '#e5e5e5', fontSize: 15}}> Excluir música </Text>
-              </View>
-            </MenuOption>
-          </MenuOptions>
-        </Menu>
-      </MenuContainer>
-    )
-  }
-}
+          </MenuOption>
+          <MenuOption onSelect={() => {handleGoToArtist(song)}}>
+            <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+              <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Artista </Text>
+            </View>
+          </MenuOption>
+          <MenuOption onSelect={() => {handleDeleteSong(song)}}>
+            <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+              <Text style={{color: '#e5e5e5', fontSize: 15}}> Excluir música </Text>
+            </View>
+          </MenuOption>
+        </MenuOptions>
+      </Menu>
+    </MenuContainer>
+  );
+};
 
-export default MenuPopup;
+// export class MenuPopup extends PureComponent<MenuPopupProps> {
+//   handleGoToAlbum(song: MusicFile){
+//     const { navigation } = this.props;
+
+//     navigation.navigate('AlbumPage',{
+//       album: {
+//         name: song.album,
+//         cover: song.cover,
+//       },
+//       artist: song.author,
+//     })
+//   }
+
+//   handleGoToArtist(song: MusicFile){
+//     const { navigation, artistList } = this.props;
+
+//     const artist = artistList.find(a => a.artist == song.author);
+
+//     if(artist){
+//       const {numberOfAlbums, numberOfSongs, albums} = artist;
+
+//       navigation.jumpTo('ArtistPage', {
+//         albums,
+//         name: artist.artist,
+//         numberOfAlbums,
+//         numberOfSongs,
+//       });
+//     }else{
+//       console.log("Artist not found (songList - handleGoToArtist)")
+//     }
+//   }
+
+//   handleDeleteSong(song: MusicFile){
+//     const { deleteSong } = this.props;
+
+//     Alert.alert(
+//       "Excluir Música",
+//       `Você tem certeza que queres excluir a música ${song.title}? ${Platform.OS === 'android' ? '\n\nATENÇÃO: Caso esteja rodando uma versão maior do que o Android 5, não será possível excluir músicas que provém de algum dispositivo externo (Cartão SD). Deseja mesmo continuar?': ''}`,
+//       [
+//         {
+//           text: "Cancelar",
+//           onPress: () => console.log("Ação cancelada"),
+//           style: "cancel"
+//         },
+//         { 
+//           text: "Sim", 
+//           onPress: () => deleteSong(song),
+//         }
+//       ],
+//       { cancelable: false }
+//     );
+//   }
+
+//   render(){
+//     const { children, trigerStyle, song } = this.props;
+//     return (
+//       <MenuContainer>
+//       <Menu>
+//           <MenuTrigger>
+//             <View style={{justifyContent: 'center', alignItems: 'center', width: 30, ...trigerStyle}} >
+//               { children }
+//             </View>
+//           </MenuTrigger>
+//           <MenuOptions customStyles={{
+//             optionsContainer: {
+//               backgroundColor: '#151515',
+//               width: 150,
+//             },
+//           }}>
+//             <MenuOption onSelect={() => {this.handleGoToAlbum(song)}}>
+//               <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+//                 <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Album </Text>
+//               </View>
+//             </MenuOption>
+//             <MenuOption onSelect={() => {this.handleGoToArtist(song)}}>
+//               <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+//                 <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Artista </Text>
+//               </View>
+//             </MenuOption>
+//             <MenuOption onSelect={() => {this.handleDeleteSong(song)}}>
+//               <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+//                 <Text style={{color: '#e5e5e5', fontSize: 15}}> Excluir música </Text>
+//               </View>
+//             </MenuOption>
+//           </MenuOptions>
+//         </Menu>
+//       </MenuContainer>
+//     )
+//   }
+// }
+
+export default React.memo(MenuPopup);
