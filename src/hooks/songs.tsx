@@ -43,6 +43,12 @@ interface MusicFilesResult{
   }[],
 }
 
+interface Playlist{
+  id: number;
+  name: string;
+  songs: MusicFile[];
+}
+
 interface ArtistList {
   albums: {
       album: string | undefined;
@@ -56,15 +62,17 @@ interface SongContextData {
   TrackPlayer: any & ITrackPlayer;
   songList: MusicFile[];
   artistList: ArtistList[];
+  playlists: Playlist[];
   playSong(song: MusicFile, playlist?: MusicFile[]): void;
-  needToRefreshPauseButton: boolean;
-  needToRefreshShuffleButton: boolean;
   setNeedToRefreshPauseButton(value: boolean): void;
   setNeedToRefreshShuffleButton(value: boolean): void;
-  isShuffleActive: boolean;
   changeShuffleValue(value?: boolean): void;
-  isLoading: boolean;
   deleteSong(song: MusicFile[]): void;
+  createPlaylist(name: String, songs?: MusicFile[]): void;
+  isLoading: boolean;
+  isShuffleActive: boolean;
+  needToRefreshPauseButton: boolean;
+  needToRefreshShuffleButton: boolean;
 }
 
 interface ITrackPlayer{
@@ -76,6 +84,7 @@ const SongContext = createContext<SongContextData>({} as SongContextData);
 const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
   const [artistList, setArtistList] = useState<ArtistList[]>([]);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [albumCoversFromStorage, setAlbumCoversFromStorage] = useState<AlbumCover[]>([]);
   const [needToRefreshPauseButton, setNeedToRefreshPauseButton] = useState(false);
   const [needToRefreshShuffleButton, setNeedToRefreshShuffleButton] = useState(false);
@@ -85,8 +94,14 @@ const SongProvider: React.FC = ({ children }) => {
   let isShuffleActive = false;
   let localScopeSongList: MusicFile[] = [];
   let albumsCoverArray: AlbumCover[] = [];
-
+  
   async function loadAsyncInfo(){
+    const playlistsFromStorage = await AsyncStorage.getItem("CauzziMusic:Playlists");
+
+    if(playlistsFromStorage){
+      setPlaylists(JSON.parse(playlistsFromStorage));
+    }
+
     const albumArrayFromStorage = await AsyncStorage.getItem("CauzziMusic:AlbumArray");
 
     if(albumArrayFromStorage){
@@ -470,19 +485,35 @@ const SongProvider: React.FC = ({ children }) => {
     AsyncStorage.setItem("CauzziMusic:AlbumArray", JSON.stringify(refreshedAlbumList))
   }, [songList, albumCoversFromStorage]);
 
+  const createPlaylist = useCallback((name: string, songs?: MusicFile[]) => {
+    setPlaylists([...playlists, {
+      id: playlists.length,
+      name: name,
+      songs: songs ? [...songs] : []
+    }]);
+
+    AsyncStorage.setItem("CauzziMusic:Playlists", JSON.stringify([...playlists,{
+      id: playlists.length,
+      name: name,
+      songs: songs ? [...songs] : []
+    }]));
+  }, [playlists]);
+
   return (
     <SongContext.Provider value={{ 
       TrackPlayer, 
       songList, 
       artistList,
+      playlists,
       playSong, 
-      needToRefreshPauseButton, 
-      needToRefreshShuffleButton,
       setNeedToRefreshPauseButton, 
       setNeedToRefreshShuffleButton,
-      isShuffleActive,
       changeShuffleValue,
+      createPlaylist,
+      isShuffleActive,
       isLoading,
+      needToRefreshPauseButton, 
+      needToRefreshShuffleButton,
       deleteSong
     }}>
       {children}
@@ -501,9 +532,3 @@ const useSongs = (): SongContextData => {
 }
 
 export { useSongs, SongProvider};
-
-/*
-
-
-
-*/

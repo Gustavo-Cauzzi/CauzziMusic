@@ -17,7 +17,6 @@ import {
   ShuffleText,
   ShuffleContainer,
   SongSelectedContainer,
-  FloatingContainer,
 } from './styles';
 import Song from '../../components/Song';
 import { useSongs } from '../../hooks/songs';

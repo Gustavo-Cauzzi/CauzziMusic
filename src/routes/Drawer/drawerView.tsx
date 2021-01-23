@@ -29,7 +29,6 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
   }, [pageSelected]);
 
   const handleGoToSearchPage = useCallback(() => {
-    console.log('hhsauidhauidhsuia');
     navigation.toggleDrawer();
     navigation.navigate('SearchPage');
   }, [navigation]);
