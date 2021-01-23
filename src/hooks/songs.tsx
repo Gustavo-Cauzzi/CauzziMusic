@@ -64,7 +64,7 @@ interface SongContextData {
   isShuffleActive: boolean;
   changeShuffleValue(value?: boolean): void;
   isLoading: boolean;
-  deleteSong(song: MusicFile): void;
+  deleteSong(song: MusicFile[]): void;
 }
 
 interface ITrackPlayer{
@@ -433,28 +433,36 @@ const SongProvider: React.FC = ({ children }) => {
     }
   }, [TrackPlayer, localScopeSongList, currentPlaylist]);
 
-  const deleteSong = useCallback((song: MusicFile) => {
-    console.log("Ação confirmada, deletando música ",song.title);
+  const deleteSong = useCallback((songs: MusicFile[]) => {
+    songs.map(song => {
+      rnfs.exists(`file://${song.path}`).then((result) => {
+        console.log("file exists: ", result);
 
-    rnfs.exists(`file://${song.path}`).then((result) => {
-      console.log("file exists: ", result);
-
-      if(result){
-        return rnfs.unlink(song.path).then(() => {
-          console.log('FILE DELETED');
+        if(result){
+          return rnfs.unlink(song.path).then(() => {
+            console.log('FILE DELETED');
+            rnfs.scanFile(song.path);
+          }).catch((err) => {
+            console.log(err.message);
+          });
+        }else{
           rnfs.scanFile(song.path);
-        }).catch((err) => {
-          console.log(err.message);
-        });
-      }else{
-        rnfs.scanFile(song.path);
-      }
-    }).catch((err) => {
-      console.log(err.message);
+        }
+      }).catch((err) => {
+        console.log(err.message);
+      });
     });
 
-    const refreshedSongList = songList.filter(s => s.id != song.id);
-    const refreshedAlbumList = albumCoversFromStorage.filter(a => a.id != song.id);
+    const refreshedSongList = songList.filter(slist => {
+      const index = songs.findIndex(s => s.id == slist.id);
+
+      if (index == -1) return slist;
+    });
+    const refreshedAlbumList = albumCoversFromStorage.filter(a => {
+      const index = songs.findIndex(s => s.id == a.id);
+
+      if (index == -1) return a;
+    });
 
     setSongList(refreshedSongList);
     setAlbumCoversFromStorage(refreshedAlbumList);

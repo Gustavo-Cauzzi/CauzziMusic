@@ -1,8 +1,5 @@
-import React, { PureComponent, useCallback, useMemo } from 'react';
-import { View, TouchableHighlight } from 'react-native';
-import IconEntypo from 'react-native-vector-icons/Entypo';
-
-import MenuPopup from '../MenuPopup';
+import React from 'react';
+import { View, TouchableOpacity } from 'react-native';
 
 import NoCoverJpg from '../../../assets/30x30.jpg';
 
@@ -32,11 +29,13 @@ const Song: React.FC<SongProps> = ({onPress, song, onLongPress}) => {
   return (
     <SongContainer>
       <SongTriger>
-        <TouchableHighlight 
+        <TouchableOpacity
+          activeOpacity={0.8} 
           style={{flexDirection: 'row', paddingHorizontal: 10, alignItems: 'center', flex: 1, alignSelf: 'stretch'}}
+          delayLongPress={200}
           onPress={() => {onPress && onPress()}} 
           onLongPress={() => {onLongPress && onLongPress()}}
-          >
+        >
           <>
             <FastImage source={song.cover ? { uri: song.cover } : NoCoverJpg} style={{width: 30, height: 30, marginRight: 10}} />
             <View>
@@ -44,15 +43,8 @@ const Song: React.FC<SongProps> = ({onPress, song, onLongPress}) => {
               <ArtistName>{song.author}</ArtistName>
             </View>
           </>
-        </TouchableHighlight>
+        </TouchableOpacity>
       </SongTriger>
-      {/* <MenuPopup song={song}>
-        <IconEntypo 
-          name="dots-three-vertical" 
-          size={20} 
-          color="#bbb" 
-          />
-      </MenuPopup> */}
     </SongContainer>
   );
 };
@@ -86,13 +78,6 @@ export default React.memo(Song);
         //             <ArtistName>{song.author}</ArtistName>
         //           </View>
         //         </SongTriger>
-        //         <MenuPopup song={song} navigation={navigation} artistList={artistList} deleteSong={deleteSong}>
-        //           <IconEntypo 
-        //             name="dots-three-vertical" 
-        //             size={20} 
-        //             color="#bbb" 
-        //             />
-        //         </MenuPopup>
         //       </SongContainer>
         //     )
         //   }

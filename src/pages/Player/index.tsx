@@ -22,7 +22,7 @@ import {
 } from './styles';
 import { useSongs } from '../../hooks/songs';
 import { EmptyAlbumCover, EmptyTimeContainer } from './emptyPlayerStyles';
-import { AppState } from 'react-native';
+import { AppState, Dimensions } from 'react-native';
 // import { addEventListener } from 'react-native-track-player';
 interface MusicFile{
   id : number,
@@ -41,6 +41,7 @@ const Player: React.FC = () => {
   const [currentSongDurantion, setCurrentSongDurantion] = useState('0:00');
   const [currentTimeStamp, setCurrentTimeStamp] = useState('0:00');
   const [currentTrack, setCurrentTrack] = useState<MusicFile>();
+  const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
 
   const { 
     TrackPlayer, 
@@ -70,6 +71,17 @@ const Player: React.FC = () => {
   }, [songList]);
 
   useEffect(() => {
+    // Dimensions.addEventListener('change', () => {
+    //   const dimensions = Dimensions.get('screen');
+    //   if(dimensions.height <= dimensions.width){
+    //     if (orientation == 'portrait') return;
+    //     setOrientation('portrait');
+    //   }else{
+    //     if (orientation == 'landscape') return;
+    //     setOrientation('landscape');
+    //   }
+    // })
+
     AppState.addEventListener('change', async (nextState) => {
       if(AppState.currentState.match(/inactive|background/) && nextState === 'active'){
         const newSongId = await TrackPlayer.getCurrentTrack();

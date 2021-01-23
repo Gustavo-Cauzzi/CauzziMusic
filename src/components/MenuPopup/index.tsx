@@ -7,7 +7,7 @@ import { useSongs } from '../../hooks/songs';
 
 interface MenuPopupProps {
   navigation?: any;
-  song: MusicFile;
+  songs: MusicFile[];
   trigerStyle?: ViewStyle;
   children?: any;
 }
@@ -33,7 +33,7 @@ interface MusicFile{
   path : string
 }
 
-const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, song, children, trigerStyle }) => {
+const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trigerStyle }) => {
   const { artistList, deleteSong } = useSongs();
 
   const handleGoToAlbum = useCallback((song: MusicFile) => {
@@ -64,10 +64,10 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, song, children, trige
 
   }, [artistList]);
 
-  const handleDeleteSong = useCallback((song: MusicFile) => {
+  const handleDeleteSong = useCallback(() => {
     Alert.alert(
       "Excluir Música",
-      `Você tem certeza que queres excluir a música ${song.title}? ${Platform.OS === 'android' ? '\n\nATENÇÃO: Caso esteja rodando uma versão maior do que o Android 5, não será possível excluir músicas que provém de algum dispositivo externo (Cartão SD). Deseja mesmo continuar?': ''}`,
+      `Você tem certeza que queres excluir a música${songs[0].title}${songs.length == 2 ? ` e ${songs[1].title}`: songs.length > 2 ? ` e outras ${songs.length - 1} músicas` : null}? ${Platform.OS === 'android' ? '\n\nATENÇÃO: Caso esteja rodando uma versão maior do que o Android 5, não será possível excluir músicas que provém de algum dispositivo externo (Cartão SD). Deseja mesmo continuar?': ''}`,
       [
         {
           text: "Cancelar",
@@ -76,12 +76,12 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, song, children, trige
         },
         { 
           text: "Sim", 
-          onPress: () => deleteSong(song),
+          onPress: () => deleteSong(songs),
         }
       ],
       { cancelable: false }
     );
-  }, []);
+  }, [songs]);
   
   return (
     <MenuContainer>
@@ -97,19 +97,26 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, song, children, trige
             width: 150,
           },
         }}>
-          <MenuOption onSelect={() => {handleGoToAlbum(song)}}>
+          { songs.length == 1
+          ?(
+            <>
+              <MenuOption onSelect={() => {handleGoToAlbum(songs[0])}}>
+                <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+                  <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Album </Text>
+                </View>
+              </MenuOption>
+              <MenuOption onSelect={() => {handleGoToArtist(songs[0])}}>
+                <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+                  <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Artista </Text>
+                </View>
+              </MenuOption>
+            </>
+            )
+            : null
+          }
+          <MenuOption onSelect={handleDeleteSong}>
             <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
-              <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Album </Text>
-            </View>
-          </MenuOption>
-          <MenuOption onSelect={() => {handleGoToArtist(song)}}>
-            <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
-              <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Artista </Text>
-            </View>
-          </MenuOption>
-          <MenuOption onSelect={() => {handleDeleteSong(song)}}>
-            <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
-              <Text style={{color: '#e5e5e5', fontSize: 15}}> Excluir música </Text>
+              <Text style={{color: '#e5e5e5', fontSize: 15}}>{songs.length > 1 ? 'Excluir Músicas' : 'Excluir Música'}</Text>
             </View>
           </MenuOption>
         </MenuOptions>

@@ -1,16 +1,21 @@
 import TextTicker from 'react-native-text-ticker';
 import styled, { css } from 'styled-components/native';
 
+interface orientationProps {
+  orientation?: 'landscape' | 'portrait';
+}
 interface SongTitleContainer {
   text: string;
   maxTextLenght: number;
 }
 
-export const Container = styled.View`
+export const Container = styled.View<orientationProps>`
   flex: 1;
   background-color: #111;
   align-items: center;
   justify-content: center;
+
+  /* ${props => props.orientation == 'landscape' ? css`flex-direction: row;` : null} */
 `;
 
 export const AlbumCover = styled.Image`

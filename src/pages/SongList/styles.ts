@@ -1,6 +1,6 @@
 import { RectButton } from 'react-native-gesture-handler';
 import TextTicker from 'react-native-text-ticker';
-import styled from 'styled-components/native';
+import styled, { css } from 'styled-components/native';
 
 export const Container = styled.View`
   flex: 1;
@@ -62,4 +62,20 @@ export const ShuffleText = styled.Text`
 export const SongNameTicker = styled(TextTicker)`
   font-family: 'Roboto Slab Regular';
   color: #e5e5e5;
+`;
+
+export const FloatingContainer = styled.View`
+  position: absolute;
+  background-color: rgba(85, 0, 255, 0.8);
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 40px;
+  right: 5px;
+  top: 0px;
+  border-radius: 10px;
+`;
+
+export const SongSelectedContainer = styled.View<{isSelected: boolean}>`
+  ${props => props.isSelected ? css`background-color: rgba(85, 0, 255, 0.2)` : null}
 `;
