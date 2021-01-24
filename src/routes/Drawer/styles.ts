@@ -15,8 +15,43 @@ export const Content = styled.View`
   flex: 1;
 `;
 
-export const PageList = styled.View`
+export const PlaylistTitle = styled.Text`
+  color: #fff;
+  font-family: 'Roboto Slab Regular';
+  font-size: 20px;
+  margin-left: 10px;
+  margin-top: 10px;
 `;
+
+export const FlatListContainer = styled.View`
+  flex: 1;
+  margin: 5px 10px;
+  padding-bottom: 10px;
+  border-top-width: 2px;
+  border-top-color: #50f;
+`;
+
+export const CreatePlaylistButton = styled(RectButton)`
+  width: 100%;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  background-color: #222;
+  padding: 5px 0px;
+`;
+
+export const CreatePlaylistButtonText = styled.Text`
+  color: #e5e5e5;
+  font-family: 'Roboto Slab Regular';
+`;
+
+export const EmptyPlaylists = styled.Text`
+  color: #bbb;
+  font-size: 10px;
+  font-family: 'Karla Regular';
+`;
+
+export const PageList = styled.View``;
 
 export const PageName = styled.Text`
   color: #fff;

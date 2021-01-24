@@ -68,7 +68,7 @@ interface SongContextData {
   setNeedToRefreshShuffleButton(value: boolean): void;
   changeShuffleValue(value?: boolean): void;
   deleteSong(song: MusicFile[]): void;
-  createPlaylist(name: String, songs?: MusicFile[]): void;
+  createPlaylist(name: String, songs?: MusicFile[]): boolean;
   isLoading: boolean;
   isShuffleActive: boolean;
   needToRefreshPauseButton: boolean;
@@ -486,6 +486,9 @@ const SongProvider: React.FC = ({ children }) => {
   }, [songList, albumCoversFromStorage]);
 
   const createPlaylist = useCallback((name: string, songs?: MusicFile[]) => {
+    const playlistWithTheSameName = playlists.find(p => p.name.toLowerCase() == name.toLowerCase());
+    if (playlistWithTheSameName) return false;
+
     setPlaylists([...playlists, {
       id: playlists.length,
       name: name,
@@ -497,6 +500,8 @@ const SongProvider: React.FC = ({ children }) => {
       name: name,
       songs: songs ? [...songs] : []
     }]));
+
+    return true;
   }, [playlists]);
 
   return (

@@ -23,7 +23,7 @@ interface QueueSong {
 
 const QueuePage: React.FC = () => {
   const [currentQueue, setCurrentQueue] = useState<QueueSong[]>([]);
- 
+
   const { TrackPlayer } = useSongs();
 
   useEffect(() => {

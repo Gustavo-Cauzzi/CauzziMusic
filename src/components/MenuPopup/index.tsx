@@ -4,6 +4,7 @@ import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-m
 import { MenuContainer } from './styles';
 import { Alert, Platform, StyleProp, Text, View, ViewStyle } from 'react-native';
 import { useSongs } from '../../hooks/songs';
+import CreatePlaylistModal from '../CreatePlaylistModal';
 
 interface MenuPopupProps {
   navigation?: any;
@@ -114,6 +115,15 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
             )
             : null
           }
+          <MenuOption onSelect={() => (
+            <CreatePlaylistModal
+              active={true}
+            />
+          )}>
+            <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+              <Text style={{color: '#e5e5e5', fontSize: 15}}>Adicionar para playlist...</Text>
+            </View>
+          </MenuOption>
           <MenuOption onSelect={handleDeleteSong}>
             <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
               <Text style={{color: '#e5e5e5', fontSize: 15}}>{songs.length > 1 ? 'Excluir Músicas' : 'Excluir Música'}</Text>

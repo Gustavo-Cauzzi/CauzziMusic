@@ -1,11 +1,26 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
-import { Container, Content, PageList, PageName, PageItem, Footer, FooterText, FooterItem, LoadingText } from './styles';
+import { 
+  Container,
+  Content,
+  PageList,
+  PageName,
+  PageItem,
+  Footer,
+  FooterText,
+  FooterItem,
+  LoadingText,
+  PlaylistTitle,
+  FlatListContainer,
+  CreatePlaylistButton,
+  CreatePlaylistButtonText,
+  EmptyPlaylists
+} from './styles';
 import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSongs } from '../../hooks/songs';
-import { View } from 'react-native';
+import { View, FlatList, Text } from 'react-native';
 
 interface DrawerProps {
   navigation?: any;
@@ -13,7 +28,7 @@ interface DrawerProps {
 
 const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({navigation, ...props}) => {
   const [pageSelected, setPageSelected] = useState(0);
-  const { isLoading } = useSongs();
+  const { isLoading, playlists, createPlaylist } = useSongs();
 
   useEffect(() => {
     setPageSelected(props.state.index);
@@ -46,7 +61,35 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
             <PageName>Lista de Artistas</PageName>
           </PageItem>
         </PageList>
-
+        <PlaylistTitle>Playlists</PlaylistTitle>
+        <FlatListContainer>
+          <FlatList
+            data={playlists}
+            keyExtractor={(item) => String(item.id)}
+            numColumns={2}
+            ListFooterComponentStyle={{
+              marginHorizontal: 10,
+              marginTop: 10,
+            }}
+            ListFooterComponent={() => (
+              <CreatePlaylistButton>
+                <CreatePlaylistButtonText>
+                  + Criar playlist
+                </CreatePlaylistButtonText>
+              </CreatePlaylistButton>
+            )}
+            ListEmptyComponent={() => (
+              <View style={{alignItems: 'center', justifyContent: 'center', marginTop: 10}}>
+                <EmptyPlaylists>Você não possui nenhuma playlist</EmptyPlaylists>
+              </View>
+            )}
+            renderItem={({item: playlist}) => (
+              <View>
+                
+              </View>
+            )}
+          />
+        </FlatListContainer>
       </Content>
       <Footer>
         <FooterItem onPress={handleGoToSearchPage}>
