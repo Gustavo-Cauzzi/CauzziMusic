@@ -6,12 +6,24 @@ import { useSongs } from '../../hooks/songs';
 
 import { ButtonContainer, ButtonText, Container, CustomButton, ErrorMessage, ErrorMessageContainer, ModalContainer, SearchBox, SearchBoxContainer, Title } from './styles';
 
+interface MusicFile{
+  id : number,
+  title : string,
+  author : string,
+  album : string,
+  genre : string,
+  duration : number, // miliseconds
+  cover :string,
+  blur : string, //Will come null if createBLur is set to false
+  path : string
+}
 interface CreatePlaylistModal {
   active: boolean;
   onClose?: () => void;
+  songs?: MusicFile[];
 }
 
-const CreatePlaylistModal: React.FC<CreatePlaylistModal> = ({active, onClose}) => {
+const CreatePlaylistModal: React.FC<CreatePlaylistModal> = ({active, onClose, songs}) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [textBoxValue, setTextBoxValue] = useState<String>('');
   const [errorMessage, setErrorMessage] = useState<String>('')
@@ -30,10 +42,8 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModal> = ({active, onClose}) =
   }, [onClose]);
 
   const handleOkPress = useCallback(() => {
-    console.log(`(${textBoxValue})`);
-
     if(textBoxValue != ''){
-      const success = createPlaylist(textBoxValue)
+      const success = createPlaylist(textBoxValue, songs ? songs : undefined);
 
       if(success){
         ToastAndroid.show('Playlist criada!',ToastAndroid.SHORT);

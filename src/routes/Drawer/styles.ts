@@ -29,6 +29,7 @@ export const FlatListContainer = styled.View`
   padding-bottom: 10px;
   border-top-width: 2px;
   border-top-color: #50f;
+  margin-bottom: 60px;
 `;
 
 export const CreatePlaylistButton = styled(RectButton)`

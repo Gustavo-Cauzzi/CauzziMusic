@@ -1,4 +1,4 @@
-import React, { PureComponent, useCallback } from 'react';
+import React, { PureComponent, useCallback, useState } from 'react';
 import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 
 import { MenuContainer } from './styles';
@@ -35,6 +35,8 @@ interface MusicFile{
 }
 
 const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trigerStyle }) => {
+  const [isModalActive, setIsModalActive] = useState<boolean>(false);
+
   const { artistList, deleteSong } = useSongs();
 
   const handleGoToAlbum = useCallback((song: MusicFile) => {
@@ -86,6 +88,7 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
   
   return (
     <MenuContainer>
+      <CreatePlaylistModal active={isModalActive} onClose={() => {setIsModalActive(false)}} songs={songs}/>
       <Menu>
         <MenuTrigger>
           <View style={{justifyContent: 'center', alignItems: 'center', width: 30, ...trigerStyle}} >
@@ -115,11 +118,7 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
             )
             : null
           }
-          <MenuOption onSelect={() => (
-            <CreatePlaylistModal
-              active={true}
-            />
-          )}>
+          <MenuOption onSelect={() => {setIsModalActive(true)}}>
             <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
               <Text style={{color: '#e5e5e5', fontSize: 15}}>Adicionar para playlist...</Text>
             </View>
@@ -134,6 +133,8 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
     </MenuContainer>
   );
 };
+
+export default React.memo(MenuPopup);
 
 // export class MenuPopup extends PureComponent<MenuPopupProps> {
 //   handleGoToAlbum(song: MusicFile){
@@ -225,5 +226,3 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
 //     )
 //   }
 // }
-
-export default React.memo(MenuPopup);

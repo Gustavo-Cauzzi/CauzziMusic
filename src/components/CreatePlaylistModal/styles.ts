@@ -7,6 +7,8 @@ interface SearchBoxContainerProps {
 }
 
 export const Container = styled.View`
+  position: absolute;
+  background-color: rgba(60,60,60,0.5);
   flex: 1;
   justify-content: center;
   align-items: center;

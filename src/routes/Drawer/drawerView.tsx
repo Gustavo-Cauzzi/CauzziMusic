@@ -20,7 +20,9 @@ import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommun
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSongs } from '../../hooks/songs';
-import { View, FlatList, Text } from 'react-native';
+import { View, FlatList } from 'react-native';
+import CreatePlaylistModal from '../../components/CreatePlaylistModal';
+import Playlist from '../../components/Playlist';
 
 interface DrawerProps {
   navigation?: any;
@@ -28,7 +30,8 @@ interface DrawerProps {
 
 const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({navigation, ...props}) => {
   const [pageSelected, setPageSelected] = useState(0);
-  const { isLoading, playlists, createPlaylist } = useSongs();
+  const [isModalActive, setIsModalActive] = useState(false);
+  const { isLoading, playlists } = useSongs();
 
   useEffect(() => {
     setPageSelected(props.state.index);
@@ -50,6 +53,7 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
 
   return (
     <Container>
+      <CreatePlaylistModal active={isModalActive} onClose={() => {setIsModalActive(false)}}/>
       <Content>
         <PageList>
           <PageItem isSelected={pageSelected == 0} onPress={() => {handleItemSelected(0, 'SongList')}} >
@@ -67,12 +71,18 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
             data={playlists}
             keyExtractor={(item) => String(item.id)}
             numColumns={2}
+            columnWrapperStyle={{
+              flex: 1,
+              paddingVertical: 10,
+              paddingHorizontal: 10,
+              backgroundColor: '#111',
+            }}
             ListFooterComponentStyle={{
               marginHorizontal: 10,
-              marginTop: 10,
+              marginVertical: 10,
             }}
             ListFooterComponent={() => (
-              <CreatePlaylistButton>
+              <CreatePlaylistButton onPress={() => {setIsModalActive(true)}}>
                 <CreatePlaylistButtonText>
                   + Criar playlist
                 </CreatePlaylistButtonText>
@@ -84,9 +94,7 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
               </View>
             )}
             renderItem={({item: playlist}) => (
-              <View>
-                
-              </View>
+              <Playlist playlist={playlist} navigation={navigation}/>
             )}
           />
         </FlatListContainer>
