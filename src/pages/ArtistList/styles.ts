@@ -8,7 +8,6 @@ export const Container = styled.View`
 `;
 
 export const Header = styled.View`
-  /* background-color: #55f; */
   flex-direction: row;
   justify-content: space-between;
   padding: 10px 15px;

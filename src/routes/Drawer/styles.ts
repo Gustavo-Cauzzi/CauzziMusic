@@ -23,6 +23,22 @@ export const PlaylistTitle = styled.Text`
   margin-top: 10px;
 `;
 
+export const SeeAllButton = styled(RectButton)`
+  height: 20px;
+  align-self: flex-end;
+  margin-right: 15px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  /* background-color: #f0f; */
+`;
+
+export const SeeAllButtonText = styled.Text`
+  color: #aaa;
+  font-family: 'Roboto Slab Regular';
+  font-size: 13px;
+`;
+
 export const FlatListContainer = styled.View`
   flex: 1;
   margin: 5px 10px;

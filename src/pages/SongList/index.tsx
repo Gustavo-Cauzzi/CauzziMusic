@@ -93,7 +93,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
                   setSongsSelected([] as MusicFile[]);
                 }}
               />
-              <MenuPopup songs={songsSelected}>
+              <MenuPopup songs={songsSelected} navigation={navigation}>
                 <IconEntypo 
                   name="dots-three-vertical" 
                   size={20} 

@@ -14,7 +14,9 @@ import {
   FlatListContainer,
   CreatePlaylistButton,
   CreatePlaylistButtonText,
-  EmptyPlaylists
+  EmptyPlaylists,
+  SeeAllButton,
+  SeeAllButtonText
 } from './styles';
 import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import IconFeather from 'react-native-vector-icons/Feather';
@@ -65,11 +67,19 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
             <PageName>Lista de Artistas</PageName>
           </PageItem>
         </PageList>
-        <PlaylistTitle>Playlists</PlaylistTitle>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <PlaylistTitle>Playlists</PlaylistTitle>
+          <SeeAllButton onPress={() => {navigation.navigate('PlaylistList', {selectionMode: false, songs: []})}}>
+            <SeeAllButtonText>
+              Ver todas
+            </SeeAllButtonText>
+            <IconFeather name="chevrons-right" size={13} color="#aaa" style={{marginTop: 3}}/>
+          </SeeAllButton>
+        </View>
         <FlatListContainer>
           <FlatList
             data={playlists}
-            keyExtractor={(item) => String(item.id)}
+            keyExtractor={(item) => item.id}
             numColumns={2}
             columnWrapperStyle={{
               flex: 1,

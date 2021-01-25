@@ -109,8 +109,6 @@ const SearchPage: React.FC<SearchPageProps> = ({ navigation }) => {
                 keyExtractor={(item) => String(item.id)}
                 renderItem={({item: song}) => (
                   <Song 
-                    deleteSong={deleteSong}
-                    artistList={artistList}
                     song={song} 
                     onPress={() => handlePlayMusic(song)}
                   />

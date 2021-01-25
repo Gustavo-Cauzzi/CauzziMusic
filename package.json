@@ -15,6 +15,7 @@
     "@react-navigation/drawer": "^5.11.4",
     "@react-navigation/material-top-tabs": "^5.3.10",
     "@react-navigation/native": "^5.8.10",
+    "buffer": "^6.0.3",
     "react": "16.13.1",
     "react-native": "0.63.3",
     "react-native-fast-image": "^8.3.4",
@@ -33,6 +34,7 @@
     "react-native-tab-view": "^2.15.2",
     "react-native-text-ticker": "^1.10.0",
     "react-native-track-player": "^1.2.3",
+    "react-native-uuid": "^1.4.9",
     "react-native-vector-icons": "^7.1.0",
     "styled-components": "^5.2.1"
   },
@@ -43,6 +45,7 @@
     "@types/jest": "^25.2.3",
     "@types/react-native": "^0.63.2",
     "@types/react-native-sortable-list": "^0.0.9",
+    "@types/react-native-uuid": "^1.4.0",
     "@types/react-native-vector-icons": "^6.4.6",
     "@types/react-test-renderer": "^16.9.2",
     "@types/styled-components": "^5.1.4",

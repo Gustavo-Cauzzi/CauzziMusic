@@ -18,9 +18,10 @@ interface MusicFile{
 }
 
 interface Playlist{
-  id: number;
+  id: string;
   name: string;
   songs: MusicFile[];
+  description: string;
 }
 
 interface PlaylistProps{

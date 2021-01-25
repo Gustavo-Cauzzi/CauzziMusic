@@ -50,35 +50,3 @@ const Song: React.FC<SongProps> = ({onPress, song, onLongPress}) => {
 };
 
 export default React.memo(Song);
-
-// interface ArtistList {
-//   albums: {
-//       album: string | undefined;
-//       cover: string | undefined;
-//   }[];
-//   artist: string;
-//   numberOfAlbums: number;
-//   numberOfSongs: number;
-// };
-
-// export default class Song extends PureComponent<SongProps> {
-  //   handlePlayMusic(){  
-    //     const { onPress } = this.props;
-    //     onPress && onPress();
-    //   }
-    
-    //   render() {
-      //     const { song, navigation, artistList, deleteSong } = this.props;
-      //     return(
-        //       <SongContainer>
-        //         <SongTriger onPress={() => {this.handlePlayMusic()}}>
-        //           <FastImage source={song.cover ? { uri: song.cover } : NoCoverJpg} style={{width: 40, height: 40, marginRight: 10}} />
-        //           <View>
-        //             <SongName>{song.title}</SongName>
-        //             <ArtistName>{song.author}</ArtistName>
-        //           </View>
-        //         </SongTriger>
-        //       </SongContainer>
-        //     )
-        //   }
-        // }

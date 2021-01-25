@@ -4,15 +4,17 @@ import MusicFiles from 'react-native-get-music-files-v3dev-test';
 import TrackPlayer from 'react-native-track-player';
 import AsyncStorage from '@react-native-community/async-storage';
 import rnfs from 'react-native-fs';
+import { Alert, ToastAndroid } from 'react-native';
+import uuid from 'react-native-uuid';
 interface MusicFile{
   id : number,
   title : string,
   author : string,
   album : string,
   genre : string,
-  duration : number, // miliseconds
+  duration : number, 
   cover :string,
-  blur : string, //Will come null if createBLur is set to false
+  blur : string, 
   path : string
 }
 
@@ -44,9 +46,10 @@ interface MusicFilesResult{
 }
 
 interface Playlist{
-  id: number;
+  id: string;
   name: string;
   songs: MusicFile[];
+  description: string;
 }
 
 interface ArtistList {
@@ -69,6 +72,9 @@ interface SongContextData {
   changeShuffleValue(value?: boolean): void;
   deleteSong(song: MusicFile[]): void;
   createPlaylist(name: String, songs?: MusicFile[]): boolean;
+  deletePlaylist(playlistId: string): void;
+  removeSongsFromPlaylist(songs: MusicFile[], playlistId: string): void;
+  addSongsToPlaylist(songs: MusicFile[], playlistId: string): void;
   isLoading: boolean;
   isShuffleActive: boolean;
   needToRefreshPauseButton: boolean;
@@ -479,9 +485,21 @@ const SongProvider: React.FC = ({ children }) => {
       if (index == -1) return a;
     });
 
+    const refreshedPlaylists = playlists.map(playlist => {
+      const refreshedSongs = playlist.songs.filter(song => {
+        const index = songs.findIndex(s => s.id == song.id);
+
+        if (index == -1) return song;
+      });
+
+      return {...playlist, songs: refreshedSongs}
+    });
+
+    setPlaylists(refreshedPlaylists)
     setSongList(refreshedSongList);
     setAlbumCoversFromStorage(refreshedAlbumList);
 
+    AsyncStorage.setItem("CauzziMusic:Playlists", JSON.stringify(refreshedPlaylists));
     AsyncStorage.setItem("CauzziMusic:AlbumArray", JSON.stringify(refreshedAlbumList))
   }, [songList, albumCoversFromStorage]);
 
@@ -490,9 +508,10 @@ const SongProvider: React.FC = ({ children }) => {
     if (playlistWithTheSameName) return false;
 
     setPlaylists([...playlists, {
-      id: playlists.length,
+      id: uuid.v4(),
       name: name,
-      songs: songs ? [...songs] : []
+      songs: songs ? [...songs] : [],
+      description: '',
     }]);
 
     AsyncStorage.setItem("CauzziMusic:Playlists", JSON.stringify([...playlists,{
@@ -504,6 +523,110 @@ const SongProvider: React.FC = ({ children }) => {
     return true;
   }, [playlists]);
 
+  const removeSongsFromPlaylist = useCallback((songs: MusicFile[], playlistId: string) => {
+    if (!playlists.find(p => p.id == playlistId)) return;
+
+    const refreshedPlaylists = playlists.map(playlist => {
+      if(playlist.id == playlistId){
+        const refreshedSongs = playlist.songs.filter(song => {
+          if(!songs.find(s => song.id == s.id)){
+            return song;
+          }
+        });
+
+        return {...playlist, songs: refreshedSongs}
+      }else{
+        return playlist;
+      }
+    });
+
+    setPlaylists(refreshedPlaylists);
+    AsyncStorage.setItem("CauzziMusic:Playlists", JSON.stringify(refreshedPlaylists));
+  }, [playlists]);
+
+  const addSongsToPlaylist  = useCallback((songs: MusicFile[], playlistId: string) => {
+    const playlist = playlists.find(p => p.id == playlistId);
+    if (!playlist) return;
+    
+    const repeatedSongs = playlist.songs.filter(song => {
+      return songs.find(s => {
+        if(s.id == song.id){
+          return s;
+        }
+      });
+    })
+    
+    let refreshedPlaylists: Playlist[] = [];
+    if(repeatedSongs.length != 0){
+      Alert.alert(
+        "Músicas Repitidas",
+        `Uma ou mais músicas selecionadas já se encontram nesta playlist. Você gostaria de coloca-las repitidamente ou adicionar apenas as músicas novas?`,
+        [
+          {
+            text: "Cancelar",
+            onPress: () => console.log("Ação cancelada"),
+            style: "cancel"
+          },
+          {
+            text: "Repitir",
+            onPress: () => {
+              refreshedPlaylists = playlists.map(p => p.id == playlistId ? {...p, songs: [...p.songs, ...songs]} : p);
+              setPlaylists(refreshedPlaylists);
+              ToastAndroid.show('Músicas Adicionadas', ToastAndroid.SHORT);
+            },
+          },
+          { 
+            text: "Apenas novas", 
+            onPress: () => {
+              const newSongs = songs.filter(song => {
+                if(!repeatedSongs.find(s => s!.id == song.id)){
+                  return song;
+                }
+              })
+
+              refreshedPlaylists = playlists.map(p => p.id == playlistId ? {...p, songs: [...p.songs, ...newSongs]} : p)
+              setPlaylists(refreshedPlaylists);
+              ToastAndroid.show('Músicas Adicionadas', ToastAndroid.SHORT);
+            },
+          }
+        ],
+        { cancelable: false }
+      );
+    }else{
+      refreshedPlaylists = playlists.map(p => p.id == playlistId ? {...p, songs: [...p.songs, ...songs]} : p);
+      setPlaylists(refreshedPlaylists);
+      ToastAndroid.show('Músicas Adicionadas', ToastAndroid.SHORT);
+    }
+
+    AsyncStorage.setItem("CauzziMusic:Playlists", JSON.stringify(refreshedPlaylists));
+  }, [playlists]);
+
+  const deletePlaylist = useCallback((playlistId: string) => {
+    const playlist = playlists.find(p => p.id == playlistId);
+    if (!playlist) return;
+
+    Alert.alert(
+      "Excluir Playlist",
+      `Você tem certeza que gostaria de remover a playlist ${playlist.name}?`,
+      [
+        {
+          text: "Cancelar",
+          onPress: () => console.log("Ação cancelada"),
+          style: "cancel"
+        },
+        { 
+          text: "Sim", 
+          onPress: () => {
+            const refreshedPlaylists = playlists.filter(p => p.id != playlistId);
+        
+            setPlaylists(refreshedPlaylists);
+            AsyncStorage.setItem("CauzziMusic:Playlists", JSON.stringify(refreshedPlaylists));
+          },
+        }
+      ],
+    );
+  }, [playlists]);
+
   return (
     <SongContext.Provider value={{ 
       TrackPlayer, 
@@ -511,10 +634,13 @@ const SongProvider: React.FC = ({ children }) => {
       artistList,
       playlists,
       playSong, 
+      addSongsToPlaylist,
       setNeedToRefreshPauseButton, 
       setNeedToRefreshShuffleButton,
       changeShuffleValue,
       createPlaylist,
+      deletePlaylist,
+      removeSongsFromPlaylist,
       isShuffleActive,
       isLoading,
       needToRefreshPauseButton, 
