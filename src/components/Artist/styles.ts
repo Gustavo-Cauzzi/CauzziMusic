@@ -25,14 +25,6 @@ export const Cover = styled.Image`
   width: 83px;
 `
 
-export const EmptyAlbumCover = styled.View`
-  height: 83px;
-  width: 83px;
-  justify-content: center;
-  align-items: center;
-  background-color: #252525;
-`;
-
 export const ArtistInfoContainer = styled.View`
   height: 40px;
   width: 100%;

@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
-import { ArtistContainer, ArtistInfoContainer, ArtistName, Cover, CoversContainers, EmptyAlbumCover } from './styles';
-import IconFontisto from 'react-native-vector-icons/Fontisto';
+import { ArtistContainer, ArtistInfoContainer, ArtistName, Cover, CoversContainers } from './styles';
+
+import NoCoverJpg from '../../../assets/50x50.jpg'
 
 interface ArtistProps {
   artist: iArtist;
@@ -29,28 +30,14 @@ const Artist: React.FC<ArtistProps> = ({artist, onPress}) => {
       <CoversContainers>
         {
           numberOfCoversPerArtist.map(i => (
-            artist.albums[i] != undefined
-              ? (
-                <Cover 
-                  key={`${artist.artist}${i}`}
-                  source={{uri: `${artist.albums[i].cover}`}} 
-                  style={{
-                    borderTopLeftRadius: i == 0 ? 10 : 0,
-                    borderTopRightRadius: i == 3 ? 10 : 0,
-                  }}
-                />
-              )
-              : (
-                <EmptyAlbumCover
-                  key={`${artist.artist}${i}`}
-                  style={{
-                    borderTopLeftRadius: i == 0 ? 10 : 0,
-                    borderTopRightRadius: i == 3 ? 10 : 0,
-                  }}
-                >
-                  <IconFontisto name="music-note" color="#fff" size={20}/>    
-                </EmptyAlbumCover>
-              )
+            <Cover 
+              key={`${artist.artist}${i}`}
+              source={ artist.albums[i] == undefined ? NoCoverJpg : {uri: `${artist.albums[i].cover}`}} 
+              style={{
+                borderTopLeftRadius: i == 0 ? 10 : 0,
+                borderTopRightRadius: i == 3 ? 10 : 0,
+              }}
+            />
           ))
         }
       </CoversContainers>

@@ -10,7 +10,7 @@ interface GoBackContainerProps {
 }
 
 export const Container = styled.View`
-  background-color: #111;
+  background-color: #000;
   flex: 1;
 `;
 

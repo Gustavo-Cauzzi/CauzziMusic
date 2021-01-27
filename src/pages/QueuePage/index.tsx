@@ -32,7 +32,7 @@ const QueuePage: React.FC = () => {
 
   async function getQueue(){
     const queue: QueueSong[] = await TrackPlayer.getQueue();
-    console.log("queue: ",queue);
+    console.log("QueuePage/queue: ",queue);
     setCurrentQueue(queue);
   }
 

@@ -9,7 +9,6 @@ import {
   Footer,
   FooterText,
   FooterItem,
-  LoadingText,
   PlaylistTitle,
   FlatListContainer,
   CreatePlaylistButton,
@@ -22,7 +21,7 @@ import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommun
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSongs } from '../../hooks/songs';
-import { View, FlatList } from 'react-native';
+import { View, FlatList, ToastAndroid } from 'react-native';
 import CreatePlaylistModal from '../../components/CreatePlaylistModal';
 import Playlist from '../../components/Playlist';
 
@@ -33,7 +32,7 @@ interface DrawerProps {
 const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({navigation, ...props}) => {
   const [pageSelected, setPageSelected] = useState(0);
   const [isModalActive, setIsModalActive] = useState(false);
-  const { isLoading, playlists } = useSongs();
+  const { playlists, searchFiles } = useSongs();
 
   useEffect(() => {
     setPageSelected(props.state.index);
@@ -48,10 +47,15 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
     }
   }, [pageSelected]);
 
-  const handleGoToSearchPage = useCallback(() => {
+  const handleGoToFilterPage = useCallback(() => {
     navigation.toggleDrawer();
-    navigation.navigate('SearchPage');
+    navigation.navigate('FilterPage');
   }, [navigation]);
+
+  const handleRefreshSongsPress = useCallback(() => {
+    searchFiles();
+    ToastAndroid.show('Atualizando Músicas', ToastAndroid.SHORT);
+  }, [searchFiles]);
 
   return (
     <Container>
@@ -100,7 +104,7 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
             )}
             ListEmptyComponent={() => (
               <View style={{alignItems: 'center', justifyContent: 'center', marginTop: 10}}>
-                <EmptyPlaylists>Você não possui nenhuma playlist</EmptyPlaylists>
+              <EmptyPlaylists>Você não possui nenhuma playlist 😢</EmptyPlaylists>
               </View>
             )}
             renderItem={({item: playlist}) => (
@@ -110,26 +114,14 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
         </FlatListContainer>
       </Content>
       <Footer>
-        <FooterItem onPress={handleGoToSearchPage}>
-          <IconMaterialCommunityIcons name="magnify" size={20} color="#d3d3d3" />
-          <FooterText>Buscar música</FooterText>
+        <FooterItem onPress={handleGoToFilterPage}>
+          <IconFeather name="filter" size={20} color="#d3d3d3" />
+          <FooterText>Filtro de Músicas</FooterText>
         </FooterItem>
-        {isLoading 
-          ? (
-            <View style={{ flexDirection: 'row' }}>
-              <IconMaterialIcons name="refresh" size={20} color="#777" />
-              <LoadingText>
-                Carregando...
-              </LoadingText>
-            </View>
-          )
-          : (
-            <FooterItem onPress={() => {}}>
-              <IconMaterialIcons name="refresh" size={20} color="#d3d3d3" />
-              <FooterText>Atualizar músicas</FooterText>
-            </FooterItem>
-          )
-        }
+        <FooterItem onPress={handleRefreshSongsPress}>
+          <IconMaterialIcons name="refresh" size={20} color="#d3d3d3" />
+          <FooterText>Atualizar músicas</FooterText>
+        </FooterItem>
       </Footer>
     </Container>
   );

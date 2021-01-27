@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { PERMISSIONS, request } from 'react-native-permissions';
+import { PERMISSIONS, requestMultiple } from 'react-native-permissions';
 import MusicFiles from 'react-native-get-music-files-v3dev-test';
 import TrackPlayer from 'react-native-track-player';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -61,11 +61,19 @@ interface ArtistList {
   numberOfAlbums: number;
   numberOfSongs: number;
 };
+
+interface UserSettings{
+  ignoreAudios: boolean;
+  hideFilteredSongs: boolean;
+}
 interface SongContextData {
   TrackPlayer: any & ITrackPlayer;
+  searchFiles(): void;
   songList: MusicFile[];
+  filteredSongList: MusicFile[];
   artistList: ArtistList[];
   playlists: Playlist[];
+  filteredSongs: MusicFile[];
   playSong(song: MusicFile, playlist?: MusicFile[]): void;
   setNeedToRefreshPauseButton(value: boolean): void;
   setNeedToRefreshShuffleButton(value: boolean): void;
@@ -75,10 +83,17 @@ interface SongContextData {
   deletePlaylist(playlistId: string): void;
   removeSongsFromPlaylist(songs: MusicFile[], playlistId: string): void;
   addSongsToPlaylist(songs: MusicFile[], playlistId: string): void;
-  isLoading: boolean;
+  addSongsToFilter(songs: MusicFile[]): void;
+  removeSongsFromFilter(songs: MusicFile[]): void;
+  isLoadingAlbumCovers: boolean;
   isShuffleActive: boolean;
   needToRefreshPauseButton: boolean;
   needToRefreshShuffleButton: boolean;
+
+  ignoreAudios: boolean;
+  changeIgnoreAudios(value: boolean): void;
+  hideFilteredSongs: boolean;
+  changeHideFilteredSongs(value: boolean): void
 }
 
 interface ITrackPlayer{
@@ -89,13 +104,17 @@ const SongContext = createContext<SongContextData>({} as SongContextData);
 
 const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
+  const [filteredSongs, setFilteredSongs] = useState<MusicFile[]>([]);
+  const [filteredSongList, setFilteredSongList] = useState<MusicFile[]>([]);
   const [artistList, setArtistList] = useState<ArtistList[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [albumCoversFromStorage, setAlbumCoversFromStorage] = useState<AlbumCover[]>([]);
   const [needToRefreshPauseButton, setNeedToRefreshPauseButton] = useState(false);
   const [needToRefreshShuffleButton, setNeedToRefreshShuffleButton] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingAlbumCovers, setIsLoadingAlbumCovers] = useState(true);
+  const [ignoreAudios, setignoreAudios] = useState(false);
+  const [hideFilteredSongs, setHideFilteredSongs] = useState(false);
+  let isThereAlbumsInStorage = false; 
   let currentPlaylist: MusicFile[] = [] as MusicFile[];
   let isShuffleActive = false;
   let localScopeSongList: MusicFile[] = [];
@@ -103,65 +122,44 @@ const SongProvider: React.FC = ({ children }) => {
   
   async function loadAsyncInfo(){
     const playlistsFromStorage = await AsyncStorage.getItem("CauzziMusic:Playlists");
-
-    if(playlistsFromStorage){
-      setPlaylists(JSON.parse(playlistsFromStorage));
-    }
-
     const albumArrayFromStorage = await AsyncStorage.getItem("CauzziMusic:AlbumArray");
-
+    const ignoreAudiosFromStorage = await AsyncStorage.getItem("CauzziMusic:IgnoreAudios");
+    const filteredSongsFromStorage = await AsyncStorage.getItem("CauzziMusic:FilteredSongs");
+    const hideFilteredSongsFromStorage = await AsyncStorage.getItem("CauzziMusic:HideFilteredSongs");
+    
+    if (playlistsFromStorage) setPlaylists(JSON.parse(playlistsFromStorage));
+    if (ignoreAudiosFromStorage) setignoreAudios(JSON.parse(ignoreAudiosFromStorage));
+    if (filteredSongsFromStorage) setFilteredSongs(JSON.parse(filteredSongsFromStorage));
+    if (hideFilteredSongsFromStorage) setHideFilteredSongs(JSON.parse(hideFilteredSongsFromStorage));
+    
     if(albumArrayFromStorage){
       albumsCoverArray = JSON.parse(albumArrayFromStorage);
       setAlbumCoversFromStorage(JSON.parse(albumArrayFromStorage))
+      setIsLoadingAlbumCovers(false);
+      isThereAlbumsInStorage = true;
     }
   }
 
   useEffect(() => {
-    if(songList.length == 0){
-      loadAsyncInfo();
+    setFilteredSongList(songList.filter(song => !filteredSongs.find(s => s.id == song.id)));
+  }, [filteredSongs, songList]);
 
-      request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE).then((result) => {
-        result != 'granted' ? console.log(result) : null
-      })
-      
-      request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE).then((result) => {
-        if(result == 'granted'){
-          MusicFiles.getAll({
-            cover: false,
-            batchSize: 0,
-            batchNumber: 0,
-            minimumSongDuration: 10000,
-            sortBy: 'TITLE',
-            sortOrder: 'ASC'
-          }).then((result: MusicFilesResult) => {
-            const arrayToAdd = result.results.map((song: any) => {
-              const albumIndex = albumsCoverArray.findIndex(a => a.id == song.id);
-
-              return {
-                ...song,  
-                author: song.artist == '<unknown>' ? 'Desconhecido' : song.artist,
-                cover: albumIndex != -1 
-                        ?  albumsCoverArray[albumIndex].cover != undefined
-                          ?  `file://${albumsCoverArray[albumIndex].cover}`
-                          : undefined
-                        : undefined
-              }
-            })
-    
-            console.log('songs.tsx: SongList acquired');
-  
-            localScopeSongList = arrayToAdd;
-            setIsLoading(false);
-            setSongList(arrayToAdd);
-
-            handleGetArtistWithRespectiveAlbums();
-            handleGetMusicFilesWithCovers();
-          }).catch((error: any) => {
-              console.log('error: ',error);
-              setIsLoading(false);
-          })
+  useEffect(() => {    
+    function requestPermissions(){
+      requestMultiple([PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE, PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE]).then((result) => {
+        if(result[PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE] == 'granted' && result[PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE] == 'granted'){
+          searchFiles();
         }else{
-          console.log(result);
+          Alert.alert(
+            "Permissões Necessárias",
+            "Por favor permita para que o Cauzzi Music possa ler as músicas presentes em seu celular!",
+            [
+              {
+                text: 'Ok',
+                onPress: () => {requestPermissions()}
+              }
+            ]
+          )
         }
       });
     }
@@ -194,6 +192,8 @@ const SongProvider: React.FC = ({ children }) => {
       })
     }
 
+    loadAsyncInfo();
+    requestPermissions();
     setupMusicPlayer();
   }, []);
 
@@ -249,7 +249,6 @@ const SongProvider: React.FC = ({ children }) => {
         }
         
         const filteredArtistsWithAlbums = artistsWithAlbuns.filter(a => a != undefined);
-
 
         setArtistList(filteredArtistsWithAlbums);
       }
@@ -319,7 +318,7 @@ const SongProvider: React.FC = ({ children }) => {
         AsyncStorage.setItem("CauzziMusic:AlbumArray", JSON.stringify(albumsCoverArray))
         setAlbumCoversFromStorage(albumsCoverArray);
 
-        const refreshedSongList: any = localScopeSongList.map(s => {
+        let refreshedSongList: any = localScopeSongList.map(s => {
           const index = albumsCoverArray.findIndex(a => a.id == s.id);  
 
           if(index == -1){
@@ -332,7 +331,14 @@ const SongProvider: React.FC = ({ children }) => {
           }
         })
 
+        if(ignoreAudios){
+          const _refreshedSongList = refreshedSongList as MusicFile[];
+          refreshedSongList = _refreshedSongList.filter(song => !song.title.includes('AUD-'));
+        }
+
         setSongList(refreshedSongList);
+        setIsLoadingAlbumCovers(false);
+        if (!isThereAlbumsInStorage) handleGetArtistWithRespectiveAlbums();
       }
     }).catch((error: any) => {
         console.log('error: ',error);
@@ -340,32 +346,49 @@ const SongProvider: React.FC = ({ children }) => {
     })
   }, [localScopeSongList, albumsCoverArray])
 
-  const playSong = useCallback(async (song: MusicFile, playlist?: MusicFile[]): Promise<void> => {
-    if (!playlist){
-      currentPlaylist = [];
-    }
+  const searchFiles = useCallback(() => {
+    MusicFiles.getAll({
+      cover: false,
+      batchSize: 0,
+      batchNumber: 0,
+      minimumSongDuration: 10000,
+      sortBy: 'TITLE',
+      sortOrder: 'ASC'
+    }).then((result: MusicFilesResult) => {
+      let arrayToAdd = result.results.map((song: any) => {
+        const albumIndex = albumsCoverArray.findIndex(a => a.id == song.id);
 
-    TrackPlayer.reset();
+        return {
+          ...song,  
+          author: song.artist == '<unknown>' ? 'Desconhecido' : song.artist,
+          cover: 
+            albumIndex != -1 
+              ?  albumsCoverArray[albumIndex].cover != undefined
+                ?  `file://${albumsCoverArray[albumIndex].cover}`
+                : undefined
+              : undefined
+        }
+      })
 
-    await TrackPlayer.add({
-      id: String(song.id),
-      url: song.path,
-      title: song.title,
-      artist: song.author,
-      artwork: song.cover,
-    });
+      if(ignoreAudios){
+        arrayToAdd = arrayToAdd.filter(song => !song.title.includes('AUD-'));
+      }
 
-    TrackPlayer.play(); 
+      console.log('songs.tsx: SongList acquired');
 
-    if(playlist){
-      generateQueue(song, playlist);
-    }else{
-      generateQueue(song);
-    }
-  }, [TrackPlayer]);
+      localScopeSongList = arrayToAdd;
+      setSongList(arrayToAdd);
+
+      handleGetArtistWithRespectiveAlbums();
+      handleGetMusicFilesWithCovers();
+    }).catch((error: any) => {
+        console.log('error: ',error);
+    })
+  }, [albumCoversFromStorage, handleGetArtistWithRespectiveAlbums, handleGetMusicFilesWithCovers, filteredSongs, ignoreAudios]);
   
   const generateQueue = useCallback((song: MusicFile, playlist?: MusicFile[]) => {
-    let playlistToProcess = localScopeSongList;
+    let playlistToProcess = filteredSongList;
+    console.log("filteredSong: ",filteredSongList);
 
     if(playlist){
       playlistToProcess = playlist;
@@ -396,10 +419,10 @@ const SongProvider: React.FC = ({ children }) => {
         }
       }
 
-     
       songsToAdd.splice(0, 1);
       
       TrackPlayer.add(songsToAdd);
+      console.log("songs/ queue: ",songsToAdd);
     }else{
       const index = playlistToProcess.findIndex(s => s.id === song.id);
       
@@ -418,8 +441,33 @@ const SongProvider: React.FC = ({ children }) => {
       const songsToAdd: any = songsToAddList.filter(s => s != undefined ? s : null);
 
       TrackPlayer.add(songsToAdd);
+      console.log("songs/ queue: ",songsToAdd);
     } 
-  }, [TrackPlayer, localScopeSongList]);
+  }, [TrackPlayer, filteredSongList]);
+
+  const playSong = useCallback(async (song: MusicFile, playlist?: MusicFile[]): Promise<void> => {
+    if (!playlist){
+      currentPlaylist = [];
+    }
+
+    TrackPlayer.reset();
+
+    await TrackPlayer.add({
+      id: String(song.id),
+      url: song.path,
+      title: song.title,
+      artist: song.author,
+      artwork: song.cover,
+    });
+
+    TrackPlayer.play(); 
+
+    if(playlist){
+      generateQueue(song, playlist);
+    }else{
+      generateQueue(song);
+    }
+  }, [TrackPlayer, generateQueue]);
 
   const changeShuffleValue = useCallback((value?: boolean) => {
     if(value != undefined){
@@ -548,13 +596,7 @@ const SongProvider: React.FC = ({ children }) => {
     const playlist = playlists.find(p => p.id == playlistId);
     if (!playlist) return;
     
-    const repeatedSongs = playlist.songs.filter(song => {
-      return songs.find(s => {
-        if(s.id == song.id){
-          return s;
-        }
-      });
-    })
+    const repeatedSongs = playlist.songs.filter(song => songs.find(s => s.id == song.id));
     
     let refreshedPlaylists: Playlist[] = [];
     if(repeatedSongs.length != 0){
@@ -627,11 +669,60 @@ const SongProvider: React.FC = ({ children }) => {
     );
   }, [playlists]);
 
+  const addSongsToFilter = useCallback((songs: MusicFile[]) => {
+    let arrayToAdd: MusicFile[] = [];
+
+    songs.map(song => {
+      const songAlreadyFiltered = filteredSongs.find(f => f.id == song.id);
+      if (songAlreadyFiltered){
+        console.log(`Song ${songAlreadyFiltered.title} (${songAlreadyFiltered.id}) already filtered`);
+        return;
+      }
+
+      arrayToAdd.push(song);
+    })
+
+    setFilteredSongs([...filteredSongs, ...arrayToAdd]);
+    ToastAndroid.show(`${arrayToAdd.length} Músicas adicionadas`, ToastAndroid.SHORT);
+    AsyncStorage.setItem('CauzziMusic:FilteredSongs', JSON.stringify([...filteredSongs, ...arrayToAdd]));
+  }, [filteredSongs, setFilteredSongs]);
+
+  const removeSongsFromFilter = useCallback((songs: MusicFile[]) => {
+    songs.map(song => {
+      const songIsFiltered = filteredSongs.find(f => f.id == song.id);
+      if (!songIsFiltered){
+        throw new Error(`Cannot remove a song that is't filtered. \n${song.title} (${song.id})`)
+      }
+    });
+
+    const refreshedFilteredSongs = filteredSongs.filter(f => !songs.find(s => s.id == f.id))
+    
+    setFilteredSongs(refreshedFilteredSongs);
+    AsyncStorage.setItem('CauzziMusic:FilteredSongs', JSON.stringify(refreshedFilteredSongs));
+  }, [filteredSongs, setFilteredSongs]);
+  
+  const changeHideFilteredSongs = useCallback((value: boolean) => {
+    setHideFilteredSongs(value)
+    AsyncStorage.setItem('CauzziMusic:HideFilteredSongs', JSON.stringify(value));
+  }, []);
+  
+  const changeIgnoreAudios = useCallback((value: boolean) => {
+    setignoreAudios(value);
+
+    searchFiles();
+    ToastAndroid.show("Atualizando lista", ToastAndroid.SHORT);
+
+    AsyncStorage.setItem('CauzziMusic:IgnoreAudios', JSON.stringify(value));
+  }, [searchFiles]);
+
   return (
     <SongContext.Provider value={{ 
       TrackPlayer, 
+      searchFiles,
       songList, 
+      filteredSongList,
       artistList,
+      filteredSongs,
       playlists,
       playSong, 
       addSongsToPlaylist,
@@ -641,11 +732,17 @@ const SongProvider: React.FC = ({ children }) => {
       createPlaylist,
       deletePlaylist,
       removeSongsFromPlaylist,
+      addSongsToFilter,
+      removeSongsFromFilter,
       isShuffleActive,
-      isLoading,
+      isLoadingAlbumCovers,
       needToRefreshPauseButton, 
       needToRefreshShuffleButton,
-      deleteSong
+      deleteSong,
+      ignoreAudios,
+      changeIgnoreAudios,
+      hideFilteredSongs,
+      changeHideFilteredSongs,
     }}>
       {children}
     </SongContext.Provider>

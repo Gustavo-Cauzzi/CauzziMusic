@@ -11,7 +11,7 @@ interface SongTitleContainer {
 
 export const Container = styled.View<orientationProps>`
   flex: 1;
-  background-color: #111;
+  background-color: #000;
   align-items: center;
   justify-content: center;
 

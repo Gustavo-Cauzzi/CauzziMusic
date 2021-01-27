@@ -4,7 +4,7 @@ import styled, { css } from 'styled-components/native';
 
 export const Container = styled.View`
   flex: 1;
-  background-color: #111;
+  background-color: #000;
 `;
 
 export const Content = styled.View`
@@ -12,13 +12,14 @@ export const Content = styled.View`
 `;  
 
 export const Header = styled.View`
-  /* background-color: #55f; */
+  background-color: #111;
   flex-direction: row;
   justify-content: space-between;
   padding: 10px 15px;
   border-bottom-width: 2px;  
   border-bottom-color: #50f; 
   height: 50px;
+  z-index: 10;
 `;  
 
 export const MenuButton = styled.TouchableOpacity`
@@ -45,8 +46,8 @@ export const ShuffleContainer = styled.View`
 `;
 
 export const ShuffleIconContainer = styled.View`
-  height: 40px;
-  width: 40px;
+  height: 30px;
+  width: 30px;
   background-color: rgba(85, 0, 255, 0.8);
   align-items: center;
   justify-content: center;

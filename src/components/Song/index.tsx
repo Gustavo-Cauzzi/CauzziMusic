@@ -11,6 +11,7 @@ interface SongProps {
   onLongPress?: () => void;
   song: MusicFile;
   navigation?: any;
+  children?: any
 }
 
 interface MusicFile{
@@ -25,7 +26,7 @@ interface MusicFile{
   path : string
 }
 
-const Song: React.FC<SongProps> = ({onPress, song, onLongPress}) => {
+const Song: React.FC<SongProps> = ({onPress, song, onLongPress, children}) => {
   return (
     <SongContainer>
       <SongTriger>
@@ -44,6 +45,7 @@ const Song: React.FC<SongProps> = ({onPress, song, onLongPress}) => {
             </View>
           </>
         </TouchableOpacity>
+        { children }
       </SongTriger>
     </SongContainer>
   );

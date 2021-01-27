@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Dimensions, FlatList, Text, View, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import IconFeather from 'react-native-vector-icons/Feather';
@@ -37,6 +37,8 @@ interface MusicFile{
   path : string
 }
 
+const screenWidth = Dimensions.get('screen').width;
+
 const SongList: React.FC<SongListProps> = ({ navigation }) => {
   const [isEditModeActive, setIsEditModeActive] = useState(false);
   const [songsSelected, setSongsSelected] = useState<MusicFile[]>([]);
@@ -46,7 +48,30 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
     playSong,
     changeShuffleValue,
     setNeedToRefreshShuffleButton,
+    isLoadingAlbumCovers,
+    hideFilteredSongs,
+    filteredSongList,
   } = useSongs();
+  
+  const animatedLoadingMarginTop = useRef(new Animated.Value(30)).current;
+  
+  useEffect(() => {
+    if(isLoadingAlbumCovers){
+      Animated.timing(animatedLoadingMarginTop, {
+        toValue: 50,
+        easing: Easing.inOut(Easing.ease),
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    }else{
+      Animated.timing(animatedLoadingMarginTop, {
+        toValue: 30,
+        easing: Easing.inOut(Easing.ease),
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isLoadingAlbumCovers]);
 
   const handleOpenDrawerMenu = useCallback(() => {
     navigation.openDrawer()
@@ -79,7 +104,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
   return (
     <Container>
       <Header>
-        <IconFeather name="menu" size={25} color="#FFF" onPress={handleOpenDrawerMenu}/>
+        <IconFeather name="menu" size={20} color="#FFF" onPress={handleOpenDrawerMenu}/>
         <Title>Lista de Músicas</Title>
         {isEditModeActive 
           ? (
@@ -105,10 +130,26 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
           : <IconMaterialCommunityIcons name="magnify" size={25} color="#fff" onPress={handleNavigateToSearchPage}/>
         }
       </Header>
+      <Animated.View style={[{
+        position: 'absolute', 
+        height: 17, 
+        width: screenWidth, 
+        zIndex: 5, 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        backgroundColor: '#5ba35b', 
+        borderBottomLeftRadius: 20, 
+        borderBottomRightRadius: 20}, 
+        {transform: [{translateY: animatedLoadingMarginTop}]}
+      ]}>
+        <Text style={{color: '#fff', fontSize: 12}}>
+          Carregando covers...
+        </Text>
+      </Animated.View>
       <Content>
         <SafeAreaView>
           <FlatList
-            data={songList}
+            data={hideFilteredSongs ? filteredSongList : songList}
             keyExtractor={(song) => String(song.id)}
             getItemLayout={(_, index) => (
               { length: 60, offset: (60 * index) + 70, index }

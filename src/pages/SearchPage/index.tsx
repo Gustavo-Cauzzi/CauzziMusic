@@ -74,9 +74,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ navigation }) => {
         <Title>Buscar Músicas</Title>
       </Header>
       <Content>
-        <SearchBoxContainer
-          isActive={isSearchBoxSelected}
-        >
+        <SearchBoxContainer isActive={isSearchBoxSelected}>
           <SearchBox 
             autoCorrect={false}          
             onFocus={() => {setIsSearchBoxSelected(true)}}  

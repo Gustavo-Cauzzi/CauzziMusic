@@ -1,5 +1,4 @@
 import { RectButton } from 'react-native-gesture-handler';
-import TextTicker from 'react-native-text-ticker';
 import styled, { css } from 'styled-components/native';
 
 interface SearchBoxContainerProps {
@@ -11,6 +10,11 @@ export const Container = styled.View`
   background-color: #000;
 `;
 
+export const Content = styled.View`
+  flex: 1;
+  padding: 10px;
+`;
+
 export const Header = styled.View`
   background-color: #111;
   flex-direction: row;
@@ -19,6 +23,7 @@ export const Header = styled.View`
   border-bottom-width: 2px;  
   border-bottom-color: #50f; 
   height: 50px;
+  z-index: 10;
 `;  
 
 export const Title = styled.Text`
@@ -27,9 +32,22 @@ export const Title = styled.Text`
   font-family: 'Roboto Slab Bold';
 `;
 
-export const Content = styled.View`
-  flex: 1;
-  padding: 10px 15px;
+export const SearchButton = styled(RectButton)`
+  height: 40px;
+  width: 95%;
+  margin: 10px 5px;
+  flex-direction: row;
+  justify-content: center;
+  background-color: #50f;
+  align-items: center;
+  border-radius: 10px;
+`;
+
+export const SearchButtonText = styled.Text`
+  color: #e5e5e5;
+  font-size: 17px;
+  margin-left: 5px;
+  font-family: 'Roboto Slab SemiBold';
 `;
 
 export const SearchBox = styled.TextInput`
@@ -38,16 +56,10 @@ export const SearchBox = styled.TextInput`
   font-family: 'Karla Regular';
 `;
 
-export const SwitchContainer = styled.View`
-  width: 100%;
-  margin: 5px 0px;
-  justify-content: center;
-  align-items: center;
-`;
-
 export const SearchBoxContainer = styled.View<SearchBoxContainerProps>`
   background-color: #252525;
-  width: 100%;
+  width: 95%;
+  margin: 10px 5px;
   height: 40px;
   padding-left: 5px;
   padding-right: 10px;
@@ -55,8 +67,11 @@ export const SearchBoxContainer = styled.View<SearchBoxContainerProps>`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
   border-bottom-width: 2px;
   border-bottom-color: #252525;
   ${props => props.isActive ? css`border-bottom-color: #50f;` : css`border-bottom-color: #252525;`}
+`;
+
+export const SongSelectedContainer = styled.View<{isSelected: boolean}>`
+  ${props => props.isSelected ? css`background-color: rgba(85, 0, 255, 0.2)` : null}
 `;

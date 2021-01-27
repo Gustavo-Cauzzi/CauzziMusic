@@ -23,6 +23,7 @@
     "react-native-gesture-handler": "^1.9.0",
     "react-native-get-music-files": "^2.1.0",
     "react-native-get-music-files-v3dev-test": "^3.1.5",
+    "react-native-paper": "^4.7.1",
     "react-native-path": "^0.0.5",
     "react-native-permissions": "^3.0.0",
     "react-native-popup-menu": "^0.15.10",

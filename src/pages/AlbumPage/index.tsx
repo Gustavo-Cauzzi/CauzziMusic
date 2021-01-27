@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import IconAntDesing from 'react-native-vector-icons/AntDesign';
-import IconFontisto from 'react-native-vector-icons/Fontisto';
 
 import { 
   AlbumCover,
@@ -16,8 +15,6 @@ import {
   GoBackContainer, 
   Info, 
   ItemDivision, 
-  SongAlbumCover, 
-  SongAlbumCoverPlaceHolder, 
   SongContainer,
   SongInfo,
   SongName,

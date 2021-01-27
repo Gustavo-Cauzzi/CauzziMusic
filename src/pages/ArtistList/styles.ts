@@ -4,10 +4,11 @@ import styled, { css } from 'styled-components/native';
 
 export const Container = styled.View`
   flex: 1;
-  background-color: #111;
+  background-color: #000;
 `;
 
 export const Header = styled.View`
+  background-color: #111;
   flex-direction: row;
   justify-content: space-between;
   padding: 10px 15px;
