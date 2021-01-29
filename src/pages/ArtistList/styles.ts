@@ -8,6 +8,7 @@ export const Container = styled.View`
 `;
 
 export const Header = styled.View`
+  position: absolute;
   background-color: #111;
   flex-direction: row;
   justify-content: space-between;
@@ -15,6 +16,8 @@ export const Header = styled.View`
   border-bottom-width: 2px;  
   border-bottom-color: #50f; 
   height: 50px;
+  width: 100%;
+  z-index: 10;
 `;  
 
 export const Title = styled.Text`

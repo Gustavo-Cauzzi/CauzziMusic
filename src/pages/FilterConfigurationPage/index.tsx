@@ -1,5 +1,4 @@
-import { NavigationContainer } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React from 'react';
 import { View } from 'react-native';
 import { Checkbox } from 'react-native-paper';
 import IconAntDesing from 'react-native-vector-icons/AntDesign';

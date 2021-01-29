@@ -1,4 +1,4 @@
-import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
+import { RectButton } from 'react-native-gesture-handler';
 import styled, { css } from 'styled-components/native';
 
 interface PageItemProps {

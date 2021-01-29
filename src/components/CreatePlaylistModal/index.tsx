@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Alert, Modal, StyleSheet, Text, View , TouchableOpacity, ToastAndroid} from 'react-native';
-import { RectButton, TextInput, TouchableHighlight } from 'react-native-gesture-handler';
+import { TouchableNativeFeedback, Modal, Animated, StyleSheet, View , ToastAndroid} from 'react-native';
 import { useSongs } from '../../hooks/songs';
 
-import { ButtonContainer, ButtonText, Container, CustomButton, ErrorMessage, ErrorMessageContainer, ModalContainer, SearchBox, SearchBoxContainer, Title } from './styles';
+import { ButtonContainer, ButtonText, CustomButton, ErrorMessage, ErrorMessageContainer, SearchBox, SearchBoxContainer, Title } from './styles';
 
 interface MusicFile{
   id : number,
@@ -31,9 +30,16 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModal> = ({active, onClose, so
 
   const { createPlaylist } = useSongs();
 
+  const animatedOpacity = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
     setErrorMessage('');
     setIsVisible(active);
+    Animated.timing(animatedOpacity, {
+      toValue: active ? 1 : 0,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
   }, [active]);
 
   const handleClosePress = useCallback(() => {
@@ -58,15 +64,17 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModal> = ({active, onClose, so
   }, [textBoxValue])
 
   return (
-    <Container>
     <Modal
-      animationType="fade"
+      animationType="none"
       transparent={true}
       visible={isVisible}
       onRequestClose={handleClosePress}
+      onDismiss={() => {
+        setIsVisible(false);
+        setErrorMessage('');
+      }}
     >
-    
-      <View style={styles.centeredView}>
+      <Animated.View style={[styles.centeredView, {opacity: animatedOpacity}]}>
         <View style={styles.modalView}>
           <Title>Criar playlist</Title>
           <SearchBoxContainer isActive={isSearchBoxSelected}>
@@ -87,26 +95,24 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModal> = ({active, onClose, so
             </ErrorMessage>
           </ErrorMessageContainer>
           <ButtonContainer>
-            <CustomButton>
-              <TouchableOpacity onPress={handleClosePress} style={{flex: 1, flexDirection: 'row', paddingHorizontal: 10, justifyContent: 'center', alignItems: 'center'}}>
+            <TouchableNativeFeedback onPress={handleClosePress}>
+              <CustomButton>
                 <ButtonText>
                   Fechar
                 </ButtonText>
-              </TouchableOpacity>
-            </CustomButton>
-            <CustomButton>
-              <TouchableOpacity onPress={handleOkPress} style={{flex: 1, flexDirection: 'row', paddingHorizontal: 10, justifyContent: 'center', alignItems: 'center'}}>
+              </CustomButton>
+            </TouchableNativeFeedback>
+            <TouchableNativeFeedback onPress={handleOkPress}>
+              <CustomButton>
                 <ButtonText>
                   Ok
                 </ButtonText>
-              </TouchableOpacity>
-            </CustomButton>
+              </CustomButton>
+            </TouchableNativeFeedback>
           </ButtonContainer>
         </View>
-      </View>
+      </Animated.View>
     </Modal>
-  </Container>
-
   );
 };
 
@@ -115,9 +121,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: 'rgba(20,20,20,0.5)',
   },
   modalView: {
-    backgroundColor: "#222",
+    backgroundColor: "#1a1a1a",
     borderRadius: 20,
     padding: 10,
     marginTop: 10,

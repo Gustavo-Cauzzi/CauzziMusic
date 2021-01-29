@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, FlatList, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { FlatList } from 'react-native';
 
 import IconFeather from 'react-native-vector-icons/Feather';
 import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';

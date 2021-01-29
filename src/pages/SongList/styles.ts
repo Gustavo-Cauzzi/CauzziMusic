@@ -8,10 +8,12 @@ export const Container = styled.View`
 `;
 
 export const Content = styled.View`
-  margin: 10px 15px;
+  margin: 0px 15px;
 `;  
 
 export const Header = styled.View`
+  position: absolute;
+  width: 100%;
   background-color: #111;
   flex-direction: row;
   justify-content: space-between;
@@ -21,9 +23,6 @@ export const Header = styled.View`
   height: 50px;
   z-index: 10;
 `;  
-
-export const MenuButton = styled.TouchableOpacity`
-`;
 
 export const Title = styled.Text`
   color: #e5e5e5;
@@ -75,6 +74,29 @@ export const FloatingContainer = styled.View`
   right: 5px;
   top: 0px;
   border-radius: 10px;
+`;
+
+export const FloatingEditContainer = styled.View`
+  position: absolute;
+  z-index: 5;
+  right: 10px;
+  top: 60px;
+  width: 40px;
+`;
+
+export const FloatingMenuContainer = styled.View`
+  height: 40px;
+  width: 40px;
+  background-color: #50f;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  margin-bottom: 10px;
+`;
+
+export const LoadingCoversTest = styled.Text`
+  color: #fff;
+  font-size: 12px;
 `;
 
 export const SongSelectedContainer = styled.View<{isSelected: boolean}>`

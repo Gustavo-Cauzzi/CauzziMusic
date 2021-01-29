@@ -6,14 +6,6 @@ interface SearchBoxContainerProps {
   isActive?: boolean;
 }
 
-export const Container = styled.View`
-  position: absolute;
-  background-color: rgba(60,60,60,0.5);
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-`;
-
 export const Title = styled.Text`
   font-size: 20px;
   color: #fff;
@@ -58,6 +50,7 @@ export const CustomButton = styled.View`
   background-color: #40f;
   margin-right: 10px;
   border-radius: 5px;
+  padding: 0px 10px;
 `;
 
 export const ButtonText = styled.Text`

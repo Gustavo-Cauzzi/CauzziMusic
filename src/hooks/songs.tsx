@@ -52,7 +52,7 @@ interface Playlist{
   description: string;
 }
 
-interface ArtistList {
+interface Artist {
   albums: {
       album: string | undefined;
       cover: string | undefined;
@@ -71,7 +71,7 @@ interface SongContextData {
   searchFiles(): void;
   songList: MusicFile[];
   filteredSongList: MusicFile[];
-  artistList: ArtistList[];
+  artistList: Artist[];
   playlists: Playlist[];
   filteredSongs: MusicFile[];
   playSong(song: MusicFile, playlist?: MusicFile[]): void;
@@ -106,7 +106,7 @@ const SongProvider: React.FC = ({ children }) => {
   const [songList, setSongList] = useState<MusicFile[]>([]);
   const [filteredSongs, setFilteredSongs] = useState<MusicFile[]>([]);
   const [filteredSongList, setFilteredSongList] = useState<MusicFile[]>([]);
-  const [artistList, setArtistList] = useState<ArtistList[]>([]);
+  const [artistList, setArtistList] = useState<Artist[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [albumCoversFromStorage, setAlbumCoversFromStorage] = useState<AlbumCover[]>([]);
   const [needToRefreshPauseButton, setNeedToRefreshPauseButton] = useState(false);
@@ -132,7 +132,7 @@ const SongProvider: React.FC = ({ children }) => {
     if (filteredSongsFromStorage) setFilteredSongs(JSON.parse(filteredSongsFromStorage));
     if (hideFilteredSongsFromStorage) setHideFilteredSongs(JSON.parse(hideFilteredSongsFromStorage));
     
-    if(albumArrayFromStorage){
+    if(albumArrayFromStorage && albumArrayFromStorage.length > 0){
       albumsCoverArray = JSON.parse(albumArrayFromStorage);
       setAlbumCoversFromStorage(JSON.parse(albumArrayFromStorage))
       setIsLoadingAlbumCovers(false);
@@ -252,7 +252,7 @@ const SongProvider: React.FC = ({ children }) => {
 
         setArtistList(filteredArtistsWithAlbums);
       }
-      console.log('songs.tsx: ArtistList Processed');
+      console.log('songs.tsx: Artist Processed');
     })
   }, [albumsCoverArray]);
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Dimensions, FlatList, Text, View, Animated, Easing } from 'react-native';
+import { Dimensions, FlatList, Animated, Easing, TouchableNativeFeedback, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import IconFeather from 'react-native-vector-icons/Feather';
@@ -17,6 +17,9 @@ import {
   ShuffleText,
   ShuffleContainer,
   SongSelectedContainer,
+  FloatingEditContainer,
+  FloatingMenuContainer,
+  LoadingCoversTest,
 } from './styles';
 import Song from '../../components/Song';
 import { useSongs } from '../../hooks/songs';
@@ -39,6 +42,10 @@ interface MusicFile{
 
 const screenWidth = Dimensions.get('screen').width;
 
+const HEADER_HEIGHT = 50;
+
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList as new () => FlatList<MusicFile>);
+
 const SongList: React.FC<SongListProps> = ({ navigation }) => {
   const [isEditModeActive, setIsEditModeActive] = useState(false);
   const [songsSelected, setSongsSelected] = useState<MusicFile[]>([]);
@@ -52,8 +59,11 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
     hideFilteredSongs,
     filteredSongList,
   } = useSongs();
-  
+
   const animatedLoadingMarginTop = useRef(new Animated.Value(30)).current;
+  const scroll = new Animated.Value(0);
+
+  const animatedScroll = Animated.multiply(Animated.diffClamp(scroll, 0, HEADER_HEIGHT), -1);
   
   useEffect(() => {
     if(isLoadingAlbumCovers){
@@ -103,66 +113,77 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
 
   return (
     <Container>
-      <Header>
-        <IconFeather name="menu" size={20} color="#FFF" onPress={handleOpenDrawerMenu}/>
-        <Title>Lista de Músicas</Title>
-        {isEditModeActive 
-          ? (
-            <View style={{flexDirection: 'row', width: 60, justifyContent: 'space-between'}}>
+      {
+        isEditModeActive &&
+        <FloatingEditContainer as={Animated.View} style={[{transform: [{translateY: animatedScroll}]}]}>
+          <FloatingMenuContainer>
+            <MenuPopup 
+              songs={songsSelected} 
+              navigation={navigation} 
+              onOptionSelected={() => {setIsEditModeActive(false)}}
+            >
+              <IconEntypo 
+                name="dots-three-vertical" 
+                size={20} 
+                color="#fff" 
+              />
+            </MenuPopup>
+          </FloatingMenuContainer>
+          <FloatingMenuContainer>
+            <TouchableNativeFeedback 
+              style={{flex: 1, width: 40, alignItems: 'center', justifyContent: 'center'}}
+              onPress={() => {
+                setIsEditModeActive(false);
+                setSongsSelected([]);
+              }}
+            >
               <IconMaterialCommunityIcons 
                 name="close" 
                 size={25} 
                 color="#fff" 
-                onPress={() => {
-                  setIsEditModeActive(false);
-                  setSongsSelected([] as MusicFile[]);
-                }}
               />
-              <MenuPopup songs={songsSelected} navigation={navigation}>
-                <IconEntypo 
-                  name="dots-three-vertical" 
-                  size={20} 
-                  color="#fff" 
-                />
-              </MenuPopup>
-            </View>
-          ) 
-          : <IconMaterialCommunityIcons name="magnify" size={25} color="#fff" onPress={handleNavigateToSearchPage}/>
-        }
+            </TouchableNativeFeedback>
+          </FloatingMenuContainer>
+        </FloatingEditContainer>
+      }
+
+      <Header as={Animated.View} style={[{transform: [{ translateY: animatedScroll }]}]}>
+        <IconFeather name="menu" size={20} color="#FFF" onPress={handleOpenDrawerMenu}/>
+        <Title>Lista de Músicas</Title>
+        <IconMaterialCommunityIcons name="magnify" size={25} color="#fff" onPress={handleNavigateToSearchPage}/>
       </Header>
-      <Animated.View style={[{
-        position: 'absolute', 
-        height: 17, 
-        width: screenWidth, 
-        zIndex: 5, 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        backgroundColor: '#5ba35b', 
-        borderBottomLeftRadius: 20, 
-        borderBottomRightRadius: 20}, 
-        {transform: [{translateY: animatedLoadingMarginTop}]}
+      <Animated.View style={[
+        styles.loadingCoversContainer, 
+        {transform: [{translateY: Animated.add(animatedLoadingMarginTop,animatedScroll)}]} 
       ]}>
-        <Text style={{color: '#fff', fontSize: 12}}>
+        <LoadingCoversTest>
           Carregando covers...
-        </Text>
+        </LoadingCoversTest>
       </Animated.View>
       <Content>
         <SafeAreaView>
-          <FlatList
+          <AnimatedFlatList
             data={hideFilteredSongs ? filteredSongList : songList}
             keyExtractor={(song) => String(song.id)}
             getItemLayout={(_, index) => (
-              { length: 60, offset: (60 * index) + 70, index }
+              { length: 60, offset: (60 * index) + 125, index }
+            )}
+            onScroll={Animated.event(
+              [{nativeEvent: {contentOffset: {y: scroll}}}],
+              {useNativeDriver: true},
             )}
             ListHeaderComponent={() => (
-              <ShuffleContainer>
-                <ShuffleButton onPress={handleIniciateShufflePlaylist}>
-                  <ShuffleIconContainer>
-                    <IconIonicons name="shuffle" size={25} color="#fff"/>
-                  </ShuffleIconContainer>
-                  <ShuffleText>Aleatório</ShuffleText>
-                </ShuffleButton>
-              </ShuffleContainer>
+              <>
+                <View style={styles.animatedHeaderCompensation}/>
+                <ShuffleContainer>
+                  <ShuffleButton onPress={handleIniciateShufflePlaylist}>
+                    <ShuffleIconContainer>
+                      <IconIonicons name="shuffle" size={25} color="#fff"/>
+                    </ShuffleIconContainer>
+                    <ShuffleText>Aleatório</ShuffleText>
+                  </ShuffleButton>
+                </ShuffleContainer>
+              </>
             )}
             renderItem={({item: song}) => (
               <SongSelectedContainer isSelected={songsSelected.findIndex(s => s.id == song.id) != -1}>
@@ -217,5 +238,37 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
     </Container>
   );
 };
+
+const styles = StyleSheet.create({
+  animatedHeader:{
+    position: 'absolute',
+    backgroundColor: '#111',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomColor: '#50f',
+    borderBottomWidth: 2,
+    width: screenWidth,
+    height: 50,
+    zIndex: 10,
+    elevation: 10,
+  },
+  loadingCoversContainer: {
+    position: 'absolute', 
+    height: 17, 
+    width: screenWidth, 
+    zIndex: 5, 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    backgroundColor: '#5ba35b', 
+    borderBottomLeftRadius: 20, 
+    borderBottomRightRadius: 20
+  },
+  animatedHeaderCompensation: {
+    width: screenWidth,
+    height: 50 + 5, //header plus a little bit more (for a margin)
+  }
+});
 
 export default SongList;
