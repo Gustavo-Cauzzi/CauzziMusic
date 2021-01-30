@@ -388,7 +388,6 @@ const SongProvider: React.FC = ({ children }) => {
   
   const generateQueue = useCallback((song: MusicFile, playlist?: MusicFile[]) => {
     let playlistToProcess = filteredSongList;
-    console.log("filteredSong: ",filteredSongList);
 
     if(playlist){
       playlistToProcess = playlist;
@@ -422,7 +421,6 @@ const SongProvider: React.FC = ({ children }) => {
       songsToAdd.splice(0, 1);
       
       TrackPlayer.add(songsToAdd);
-      console.log("songs/ queue: ",songsToAdd);
     }else{
       const index = playlistToProcess.findIndex(s => s.id === song.id);
       
@@ -441,7 +439,6 @@ const SongProvider: React.FC = ({ children }) => {
       const songsToAdd: any = songsToAddList.filter(s => s != undefined ? s : null);
 
       TrackPlayer.add(songsToAdd);
-      console.log("songs/ queue: ",songsToAdd);
     } 
   }, [TrackPlayer, filteredSongList]);
 

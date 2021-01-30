@@ -48,6 +48,7 @@ const AnimatedFlatList = Animated.createAnimatedComponent(FlatList as new () => 
 
 const SongList: React.FC<SongListProps> = ({ navigation }) => {
   const [isEditModeActive, setIsEditModeActive] = useState(false);
+  const [editAnimationCompensation, setEditAnimationCompensation] = useState(false);
   const [songsSelected, setSongsSelected] = useState<MusicFile[]>([]);
 
   const {
@@ -61,27 +62,33 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
   } = useSongs();
 
   const animatedLoadingMarginTop = useRef(new Animated.Value(30)).current;
+  const animatedXEditContainer = useRef(new Animated.Value(70)).current;
+  
   const scroll = new Animated.Value(0);
-
   const animatedScroll = Animated.multiply(Animated.diffClamp(scroll, 0, HEADER_HEIGHT), -1);
   
   useEffect(() => {
-    if(isLoadingAlbumCovers){
-      Animated.timing(animatedLoadingMarginTop, {
-        toValue: 50,
-        easing: Easing.inOut(Easing.ease),
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
-    }else{
-      Animated.timing(animatedLoadingMarginTop, {
-        toValue: 30,
-        easing: Easing.inOut(Easing.ease),
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
-    }
+    Animated.timing(animatedLoadingMarginTop, {
+      toValue: isLoadingAlbumCovers ? 50 : 30,
+      easing: Easing.inOut(Easing.ease),
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
   }, [isLoadingAlbumCovers]);
+
+  useEffect(() => {
+    if(isEditModeActive){
+      setEditAnimationCompensation(true);
+    }
+    Animated.timing(animatedXEditContainer, {
+      toValue: isEditModeActive ? 0 : 70,
+      easing: Easing.inOut(Easing.ease),
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {() => {
+      setEditAnimationCompensation(false);
+    }});
+  }, [isEditModeActive]);
 
   const handleOpenDrawerMenu = useCallback(() => {
     navigation.openDrawer()
@@ -114,8 +121,8 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
   return (
     <Container>
       {
-        isEditModeActive &&
-        <FloatingEditContainer as={Animated.View} style={[{transform: [{translateY: animatedScroll}]}]}>
+        (isEditModeActive || editAnimationCompensation) &&
+        <FloatingEditContainer as={Animated.View} style={[{transform: [{translateY: animatedScroll}, {translateX: animatedXEditContainer}]}]}>
           <FloatingMenuContainer>
             <MenuPopup 
               songs={songsSelected} 
@@ -178,7 +185,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
                 <ShuffleContainer>
                   <ShuffleButton onPress={handleIniciateShufflePlaylist}>
                     <ShuffleIconContainer>
-                      <IconIonicons name="shuffle" size={25} color="#fff"/>
+                      <IconIonicons name="shuffle" size={23} color="#fff"/>
                     </ShuffleIconContainer>
                     <ShuffleText>Aleatório</ShuffleText>
                   </ShuffleButton>

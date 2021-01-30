@@ -1,5 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, View, FlatList, ToastAndroid, TouchableNativeFeedback } from 'react-native';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
+
+import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import IconFeather from 'react-native-vector-icons/Feather';
+import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 import { 
   Container,
   Content,
@@ -17,13 +23,11 @@ import {
   SeeAllButton,
   SeeAllButtonText
 } from './styles';
-import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import IconFeather from 'react-native-vector-icons/Feather';
-import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSongs } from '../../hooks/songs';
-import { View, FlatList, ToastAndroid } from 'react-native';
 import CreatePlaylistModal from '../../components/CreatePlaylistModal';
 import Playlist from '../../components/Playlist';
+import { TouchableHighlight } from 'react-native-gesture-handler';
+import { Easing } from 'react-native-reanimated';
 
 interface DrawerProps {
   navigation?: any;
@@ -33,6 +37,8 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
   const [pageSelected, setPageSelected] = useState(0);
   const [isModalActive, setIsModalActive] = useState(false);
   const { playlists, searchFiles } = useSongs();
+
+  const animatedRotation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     setPageSelected(props.state.index);
@@ -55,6 +61,17 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
   const handleRefreshSongsPress = useCallback(() => {
     searchFiles();
     ToastAndroid.show('Atualizando Músicas', ToastAndroid.SHORT);
+    Animated.timing(animatedRotation, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start(() => {
+      Animated.timing(animatedRotation, {
+        toValue: 0,
+        duration: 1,
+        useNativeDriver: true,
+      }).start();
+    });
   }, [searchFiles]);
 
   return (
@@ -115,12 +132,23 @@ const DrawerView: React.FC<DrawerContentComponentProps & DrawerProps> = ({naviga
       </Content>
       <Footer>
         <FooterItem onPress={handleGoToFilterPage}>
-          <IconFeather name="filter" size={20} color="#d3d3d3" />
+          <IconFeather name="filter" size={20} color="#d3d3d3"/>
           <FooterText>Filtro de Músicas</FooterText>
         </FooterItem>
         <FooterItem onPress={handleRefreshSongsPress}>
-          <IconMaterialIcons name="refresh" size={20} color="#d3d3d3" />
-          <FooterText>Atualizar músicas</FooterText>
+              <Animated.View style={[
+                {transform: 
+                  [{rotate: 
+                    animatedRotation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0deg', '360deg']
+                    })
+                  }]}
+                ]}
+              >
+                <IconMaterialIcons name="refresh" size={20} color="#d3d3d3" />
+              </Animated.View>
+              <FooterText>Atualizar músicas</FooterText>
         </FooterItem>
       </Footer>
     </Container>

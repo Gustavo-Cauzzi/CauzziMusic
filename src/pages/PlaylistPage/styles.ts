@@ -8,7 +8,7 @@ export const Container = styled.View`
 export const InfoContainer = styled.View`
   height: 300px;
   align-items: center;
-  padding-top: 20px;
+  padding-top: 50px;
 `;
 
 export const AlbumContainer = styled.View`

@@ -48,25 +48,25 @@ const ArtistList: React.FC<ArtistListProps> = ({ navigation }) => {
       </Header>
       <SafeAreaView>
         <Content>
-        <AnimatedFlatList
-          data={artistList}
-          keyExtractor={(_: any, i: number) => String(i)}
-          onScroll={Animated.event(
-            [{nativeEvent: {contentOffset: {y: scroll}}}],
-            {useNativeDriver: true},
-          )}
-          ListHeaderComponent={() => (
-            <View style={{flex: 1, height: 50 + 5}}/> // absolute header compensation
-          )}
-          getItemLayout={(_: any, index: number) => (
-            { length: 133, offset: (133 * index) + 55, index }
-          )}
-          renderItem={({item: artist}: {item: iArtist}) => (
-            <Artist
-              artist={artist}
-              onPress={() => {handleGoToArtistPage(artist)}}
-            />
-          )}
+          <AnimatedFlatList
+            data={artistList}
+            keyExtractor={(_: any, i: number) => String(i)}
+            onScroll={Animated.event(
+              [{nativeEvent: {contentOffset: {y: scroll}}}],
+              {useNativeDriver: true},
+            )}
+            ListHeaderComponent={() => (
+              <View style={{flex: 1, height: 50 + 15}}/> // absolute header compensation
+            )}
+            getItemLayout={(_: any, index: number) => (
+              { length: 133, offset: (133 * index) + 70, index }
+            )}
+            renderItem={({item: artist}: {item: iArtist}) => (
+              <Artist
+                artist={artist}
+                onPress={() => {handleGoToArtistPage(artist)}}
+              />
+            )}
           />
         </Content>
       </SafeAreaView>

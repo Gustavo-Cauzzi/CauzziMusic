@@ -1,6 +1,6 @@
 import { useRoute } from '@react-navigation/native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, Easing, FlatList, View } from 'react-native';
 import { TouchableNativeFeedback } from 'react-native-gesture-handler';
 
 import IconEntypo from 'react-native-vector-icons/Entypo';
@@ -50,15 +50,35 @@ interface PlaylistPageProps{
   navigation?: any;
 }
 
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList as new () => FlatList<MusicFile>);
+
 const PlaylistPage: React.FC<PlaylistPageProps> = ({navigation}) => {
   const [playlist, setPlaylist] = useState<Playlist>({id: '', name: '', songs: [], description: ''});
   const [isEditModeActive, setIsEditModeActive] = useState<boolean>(false);
   const [songsSelected, setSongsSelected] = useState<MusicFileIndex[]>([]);
+  const [editAnimationCompensation, setEditAnimationCompensation] = useState(false);
+
+  const animatedXEditContainer = useRef(new Animated.Value(70)).current;
+  const animatedFlatlistScrollValue = useRef(new Animated.Value(0)).current;
 
   const route = useRoute();
   
   const { playSong, playlists } = useSongs();
 
+  useEffect(() => {
+    if(isEditModeActive){
+      setEditAnimationCompensation(true);
+    }
+    Animated.timing(animatedXEditContainer, {
+      toValue: isEditModeActive ? 0 : 70,
+      easing: Easing.inOut(Easing.ease),
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {() => {
+      setEditAnimationCompensation(false);
+    }});
+  }, [isEditModeActive]);
+  
   useEffect(() => {
     if (playlist.id == '') return;
     const currentPlaylist = playlists.find(p => p.id == playlist.id);
@@ -120,9 +140,26 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({navigation}) => {
 
   return (
     <Container>
+      <Animated.View 
+        style={[
+          {position: 'absolute', left: 20, top: 20}, 
+          {opacity: animatedFlatlistScrollValue.interpolate({
+            inputRange: [0, 150],
+            outputRange: [1 , 0]
+          })}
+        ]}
+      >
+        <TouchableNativeFeedback onPress={() => {navigation.openDrawer()}}>
+          <IconFeather 
+            name="menu" 
+            size={25} 
+            color="#FFF" 
+          />
+        </TouchableNativeFeedback>
+      </Animated.View>
       {
-        isEditModeActive &&
-        <FloatingContainer>
+        (isEditModeActive || editAnimationCompensation) &&
+        <FloatingContainer as={Animated.View} style={[{transform: [{translateX: animatedXEditContainer}]}]}>
           <FloatingMenuContainer>
             <MenuPopup 
               songs={songsSelected} 
@@ -148,26 +185,38 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({navigation}) => {
           </FloatingMenuContainer>
         </FloatingContainer>
       }
-      <FlatList
+      <AnimatedFlatList
         data={playlist.songs}
         keyExtractor={(_, i) => String(i)}
         contentContainerStyle={{paddingHorizontal: 5}}
-        ListEmptyComponent={() => (
-          <View style={{flex: 1, height: 30, alignItems: 'center', justifyContent: 'center'}}>
-            <EmptyPlaylistText>
-              Esta playlist está vazia! 🙁
-            </EmptyPlaylistText>
-          </View>
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {y: animatedFlatlistScrollValue}}}],
+          {useNativeDriver: true},
         )}
         ListHeaderComponent={() => (
-          <InfoContainer>
-            <IconFeather 
-              name="menu" 
-              size={25} 
-              color="#FFF" 
-              onPress={() => {navigation.openDrawer()}}
-              style={{alignSelf: 'flex-start', marginLeft: 20}}
-            />
+          <InfoContainer
+            as={Animated.View} 
+            style={[{
+              transform: [
+                {
+                  translateY: animatedFlatlistScrollValue.interpolate({
+                    inputRange: [0, 150],
+                    outputRange: [0 , 100]
+                  })
+                }, 
+                {
+                  scale: animatedFlatlistScrollValue.interpolate({
+                    inputRange: [0, 400],
+                    outputRange: [1 , 0]
+                  })
+                },
+              ],
+              opacity: animatedFlatlistScrollValue.interpolate({
+                inputRange: [0, 175],
+                outputRange: [1 , 0]
+              })
+            }]}
+          >
             <AlbumContainer>
               <View style={{height: 75, width: 150, flexDirection: 'row'}}>
                 <AlbumCover source={playlist.songs[0] == undefined ? NoCoverJpg : {uri: playlist.songs[0].cover}}/>
@@ -187,6 +236,13 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({navigation}) => {
               </PlaylistDetails>
             </PlaylistInfo>
           </InfoContainer>
+        )}
+        ListEmptyComponent={() => (
+          <View style={{flex: 1, height: 30, alignItems: 'center', justifyContent: 'center'}}>
+            <EmptyPlaylistText>
+              Esta playlist está vazia! 🙁
+            </EmptyPlaylistText>
+          </View>
         )}
         renderItem={({item: song, index}) => (
           <SongSelectedContainer isSelected={songsSelected.findIndex(s => s.index == index) != -1}>

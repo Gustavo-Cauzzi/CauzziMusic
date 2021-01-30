@@ -50,7 +50,7 @@ export const ShuffleIconContainer = styled.View`
   background-color: rgba(85, 0, 255, 0.8);
   align-items: center;
   justify-content: center;
-  margin-right: 15px;
+  margin-right: 10px;
 `;
 
 export const ShuffleText = styled.Text`

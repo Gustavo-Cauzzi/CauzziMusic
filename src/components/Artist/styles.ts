@@ -1,5 +1,6 @@
 import styled from 'styled-components/native';
 import { RectButton } from 'react-native-gesture-handler';
+import TextTicker from 'react-native-text-ticker';
 
 export const ArtistContainer = styled(RectButton)`
   width: 100%;
@@ -18,6 +19,12 @@ export const CoversContainers = styled.View`
 
 export const ArtistName = styled.Text`
   color: #e5e5e5;
+  font-family: 'Roboto Slab Regular';
+`;
+
+export const ArtistNameTicker = styled(TextTicker)`
+  color: #e5e5e5;
+  font-family: 'Roboto Slab Regular';
 `;
 
 export const Cover = styled.Image`

@@ -1,11 +1,11 @@
 import { useRoute } from '@react-navigation/native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Dimensions, View } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Dimensions, View, Animated } from 'react-native';
+import { FlatList, RectButton, TouchableNativeFeedback } from 'react-native-gesture-handler';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
 import IconAntDesing from 'react-native-vector-icons/AntDesign';
 
-import { ArtistInfo, Container, RandomCoverAlbum, Content, ArtistName, ArtistNameContainer, CurrentAlbumText, EmptyAlbumCover, CoverOverlay, AlbumContainer, AlbumCover, AlbumInfoContainer, AlbumName, SmallEmptyAlbumCover, AlbumNameTicker, NumberOfSongs, RandomAlbumNameTicker, GoBackContainer, BackgroundColor } from './styles';
+import { ArtistInfo, Container, RandomCoverAlbum, ArtistName, ArtistNameContainer, CurrentAlbumText, EmptyAlbumCover, CoverOverlay, AlbumContainer, AlbumCover, AlbumInfoContainer, AlbumName, SmallEmptyAlbumCover, AlbumNameTicker, NumberOfSongs, RandomAlbumNameTicker, GoBackContainer, BackgroundColor } from './styles';
 
 interface Album {
   album: string | undefined;
@@ -24,16 +24,20 @@ interface ArtistPageProps {
   navigation?: any;
 }
 
+const screenWidth = Dimensions.get('window').width;
+
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList as new () => FlatList<Album>);
+
 const ArtistPage: React.FC<ArtistPageProps> = ({ navigation }) => {
   const [currentArtist, setCurrentArtist] = useState<Artist>({} as Artist);
   const [currentRandomAlbum, setCurrentRandomAlbum] = useState<Album>({} as Album);
   const [isGoBackVisible, setIsGoBackVisible] = useState(true);
 
+  const animatedGoBackOpacity = useRef(new Animated.Value(0)).current;
+  
   const maxAlbumNameAlbumContainer = 16;
   const maxAlbumNameArtistInfo = 37;
 
-  const screenWidth = Dimensions.get('window').width;
-  
   const route = useRoute();
   let routeParams = route.params as Artist;
   
@@ -84,20 +88,27 @@ const ArtistPage: React.FC<ArtistPageProps> = ({ navigation }) => {
             </EmptyAlbumCover>
           )
       } 
-      <GoBackContainer onPress={handleGoBack} isVisible={isGoBackVisible}>
-        <IconAntDesing name="arrowleft" size={20} color="#fff"/>
+      <GoBackContainer 
+        as={Animated.View} 
+        style={[
+          {opacity: animatedGoBackOpacity.interpolate({
+            inputRange: [0, screenWidth],
+            outputRange: [1, 0],
+          })}
+        ]}
+      >
+        <TouchableNativeFeedback  onPress={handleGoBack}>
+          <IconAntDesing name="arrowleft" size={20} color="#fff"/>
+        </TouchableNativeFeedback>
       </GoBackContainer>
-      <FlatList
+      <AnimatedFlatList
         data={currentArtist.albums}
         keyExtractor={album => `${album.album}${album.cover}`}
         numColumns={2}
-        onScroll={(scroll) => {
-          if(!isGoBackVisible && scroll.nativeEvent.contentOffset.y < screenWidth - 40){
-            setIsGoBackVisible(true);
-          }else if(isGoBackVisible && scroll.nativeEvent.contentOffset.y >= screenWidth - 40){
-            setIsGoBackVisible(false);
-          }
-        }}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {y: animatedGoBackOpacity}}}],
+          {useNativeDriver: true},
+        )}
         columnWrapperStyle={{
           flex: 1,
           paddingVertical: 10,

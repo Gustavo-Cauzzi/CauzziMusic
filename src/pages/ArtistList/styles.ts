@@ -70,7 +70,6 @@ export const EmptyAlbumCover = styled.View`
 `;
 
 export const Content = styled.View`
-  margin: 15px;
+  margin: 0px 15px;
   align-items: center;
-  ${ Platform.OS == 'android' ? (css`padding-bottom: 30px `) : null}
 `;

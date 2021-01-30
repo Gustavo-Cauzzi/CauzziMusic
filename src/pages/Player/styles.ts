@@ -71,6 +71,12 @@ export const IconFooter = styled.View`
   bottom: 20px;
 `;
 
+export const MenuContainer = styled.View`
+  position: absolute;
+  top: 30px; 
+  right: 20px;
+`;
+
 export const SongTitleContainer = styled.View<SongTitleContainer>`
   width: 300px;
   ${props => props.text.length > props.maxTextLenght ? null : css`align-items: center`}

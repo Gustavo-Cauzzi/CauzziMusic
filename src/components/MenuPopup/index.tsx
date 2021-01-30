@@ -6,6 +6,7 @@ import { Alert, Platform, StyleProp, Text, View, ViewStyle } from 'react-native'
 import { useSongs } from '../../hooks/songs';
 import CreatePlaylistModal from '../CreatePlaylistModal';
 import { remove } from 'react-native-track-player';
+import { openLimitedPhotoLibraryPicker } from 'react-native-permissions';
 
 interface MenuPopupProps {
   navigation?: any;
@@ -13,8 +14,11 @@ interface MenuPopupProps {
   trigerStyle?: ViewStyle;
   children?: any;
   removeFromPlaylistId?: string;
-  onOptionSelected?: () => void;
+  onOptionSelected?: (option?: 'goToArtist' | 'goToAlbum' | 'deleteSong' | 'addToPlaylist' | 'removeFromPlaylist') => void;
+  deleteOption?: boolean;
 }
+
+type OptionSelected = 'goToArtist' | 'goToAlbum' | 'deleteSong' | 'addToPlaylist' | 'removeFromPlaylist';
 
 interface MusicFile{
   id : number,
@@ -28,13 +32,13 @@ interface MusicFile{
   path : string
 }
 
-const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trigerStyle, removeFromPlaylistId = '', onOptionSelected }) => {
+const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trigerStyle, removeFromPlaylistId = '', onOptionSelected, deleteOption = true }) => {
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
 
   const { artistList, deleteSong, removeSongsFromPlaylist } = useSongs();
 
-  const handleGoToAlbum = useCallback((song: MusicFile) => {
-    onOptionSelected && onOptionSelected();
+  const handleGoToAlbum = useCallback((song: MusicFile, optionSelected: OptionSelected) => {
+    onOptionSelected && onOptionSelected(optionSelected);
 
     navigation.navigate('AlbumPage',{
       album: {
@@ -45,8 +49,8 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
     })
   }, []);
 
-  const handleGoToArtist = useCallback((song: MusicFile) => {
-    onOptionSelected && onOptionSelected();
+  const handleGoToArtist = useCallback((song: MusicFile, optionSelected: OptionSelected) => {
+    onOptionSelected && onOptionSelected(optionSelected);
 
     const artist = artistList.find(a => a.artist == song.author);
 
@@ -65,7 +69,7 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
 
   }, [artistList]);
 
-  const handleDeleteSong = useCallback(() => {
+  const handleDeleteSong = useCallback((optionSelected: OptionSelected) => {
     Alert.alert(
       "Excluir Música",
       `Você tem certeza que queres excluir a música${songs[0].title}${songs.length == 2 ? ` e ${songs[1].title}`: songs.length > 2 ? ` e outras ${songs.length - 1} músicas` : null}? ${Platform.OS === 'android' ? '\n\nATENÇÃO: Caso esteja rodando uma versão maior do que o Android 5, não será possível excluir músicas que provém de algum dispositivo externo (Cartão SD). Deseja mesmo continuar?': ''}`,
@@ -78,7 +82,7 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
         { 
           text: "Sim", 
           onPress: () => {
-            onOptionSelected && onOptionSelected(); 
+            onOptionSelected && onOptionSelected(optionSelected); 
             deleteSong(songs);
           },
         }
@@ -87,7 +91,7 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
     );
   }, [songs]);
   
-  const handleDeleteSongsFromPlaylist = useCallback(() => {
+  const handleDeleteSongsFromPlaylist = useCallback((optionSelected: OptionSelected) => {
     Alert.alert(
       "Remover Músicas",
       `Você tem certeza que queres excluir a música ${songs[0].title}${songs.length == 2 ? `e ${songs[1].title}`: songs.length > 2 ? `e outras ${songs.length - 1} músicas` : ''} da playlist?`,
@@ -100,7 +104,7 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
         { 
           text: "Sim", 
           onPress: () => {
-            onOptionSelected && onOptionSelected();
+            onOptionSelected && onOptionSelected(optionSelected);
             removeSongsFromPlaylist(songs, removeFromPlaylistId);
           },
         }
@@ -108,6 +112,11 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
       { cancelable: false }
     );
   }, [songs, removeFromPlaylistId]);
+
+  const handleAddToPlaylist = useCallback((songs: MusicFile[], optionSelected: OptionSelected) => {
+    navigation.navigate('PlaylistList', {selectionMode: true, songs: songs});
+    onOptionSelected && onOptionSelected(optionSelected);
+  }, [onOptionSelected]);
 
   return (
     <MenuContainer>
@@ -127,12 +136,12 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
           { songs.length == 1
           ?(
             <>
-              <MenuOption onSelect={() => {handleGoToAlbum(songs[0])}}>
+              <MenuOption onSelect={() => {handleGoToAlbum(songs[0], 'goToAlbum')}}>
                 <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
                   <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Album </Text>
                 </View>
               </MenuOption>
-              <MenuOption onSelect={() => {handleGoToArtist(songs[0])}}>
+              <MenuOption onSelect={() => {handleGoToArtist(songs[0], 'goToArtist')}}>
                 <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
                   <Text style={{color: '#e5e5e5', fontSize: 15}}> Ir para Artista </Text>
                 </View>
@@ -144,25 +153,27 @@ const MenuPopup: React.FC<MenuPopupProps> = ({ navigation, songs, children, trig
           {
             removeFromPlaylistId != ''
               ?(
-                <MenuOption onSelect={handleDeleteSongsFromPlaylist}>
+                <MenuOption onSelect={() => {handleDeleteSongsFromPlaylist('removeFromPlaylist')}}>
                   <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
                     <Text style={{color: '#e5e5e5', fontSize: 15}}>Remover da Playlist</Text>
                   </View>
                 </MenuOption>
               )
               : (
-                <MenuOption onSelect={() => {navigation.navigate('PlaylistList', {selectionMode: true, songs: songs})}}>
+                <MenuOption onSelect={() => {handleAddToPlaylist(songs, 'addToPlaylist')}}>
                   <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
                     <Text style={{color: '#e5e5e5', fontSize: 15}}>Adicionar para playlist...</Text>
                   </View>
                 </MenuOption>
               )
           }
-          <MenuOption onSelect={handleDeleteSong}>
-            <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
-              <Text style={{color: '#e5e5e5', fontSize: 15}}>{songs.length > 1 ? 'Excluir Músicas' : 'Excluir Música'}</Text>
-            </View>
-          </MenuOption>
+          { deleteOption &&
+            <MenuOption onSelect={() => {handleDeleteSong('deleteSong')}}>
+              <View style={{padding: 10, borderLeftColor: "#50f", borderLeftWidth: 2}}>
+                <Text style={{color: '#e5e5e5', fontSize: 15}}>{songs.length > 1 ? 'Excluir Músicas' : 'Excluir Música'}</Text>
+              </View>
+            </MenuOption>
+          }
         </MenuOptions>
       </Menu>
     </MenuContainer>

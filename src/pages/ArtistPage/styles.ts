@@ -128,7 +128,7 @@ export const AlbumNameTicker = styled(TextTicker)`
   font-size: 15px;
 `;
 
-export const GoBackContainer = styled(RectButton)<GoBackContainerProps>`
+export const GoBackContainer = styled.View`
   position: absolute;
   top: 10px;
   left: 10px;
@@ -140,7 +140,4 @@ export const GoBackContainer = styled(RectButton)<GoBackContainerProps>`
   justify-content: center;
   border-radius: 17.5px;
   z-index: 10;
-  /* transition: opacity 0.2s; */
-
-  ${props => !props.isVisible ? css`opacity: 0` : css`opacity: 0.8`}
 `;

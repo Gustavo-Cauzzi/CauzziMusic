@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
+import { AppState, TouchableNativeFeedback } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import React, { useCallback, useEffect } from 'react';
+import Slider from '@react-native-community/slider'
+
 import IconFeather from 'react-native-vector-icons/Feather'
 import IconFontisto from 'react-native-vector-icons/Fontisto';
 import IconIonicons from 'react-native-vector-icons/Ionicons'
-
-import Slider from '@react-native-community/slider'
+import IconEntypo from 'react-native-vector-icons/Entypo';
 
 import { 
   AlbumCover, 
@@ -18,12 +19,12 @@ import {
   SongTitleContainer, 
   TimeContainer, 
   SongTitle, 
-  IconFooter 
+  IconFooter, 
+  MenuContainer
 } from './styles';
 import { useSongs } from '../../hooks/songs';
 import { EmptyAlbumCover, EmptyTimeContainer } from './emptyPlayerStyles';
-import { AppState, Dimensions } from 'react-native';
-// import { addEventListener } from 'react-native-track-player';
+import MenuPopup from '../../components/MenuPopup';
 interface MusicFile{
   id : number,
   title : string,
@@ -34,14 +35,18 @@ interface MusicFile{
   path : string
 }
 
-const Player: React.FC = () => {
+interface PlayerProps {
+  navigation?: any;
+}
+
+const Player: React.FC<PlayerProps> = ({ navigation }) => {
   const route = useRoute();
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentTrackPosition, setCurrentTrackPosition] = useState(0);
   const [currentSongDurantion, setCurrentSongDurantion] = useState('0:00');
   const [currentTimeStamp, setCurrentTimeStamp] = useState('0:00');
   const [currentTrack, setCurrentTrack] = useState<MusicFile>();
-  const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
+  // const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
 
   const { 
     TrackPlayer, 
@@ -219,6 +224,34 @@ const Player: React.FC = () => {
 
   return (
     <Container>
+      <MenuContainer>
+        {
+          currentTrack 
+            ?
+            <MenuPopup 
+              deleteOption={false} 
+              songs={[{...currentTrack, genre: '', blur: ''}]} 
+              navigation={navigation}
+              onOptionSelected={(optionSelected) => {
+                if(optionSelected == 'goToAlbum' || optionSelected == 'goToArtist'){
+                  navigation.jumpTo('DrawerRouter');
+                }
+              }}
+            >
+              <IconEntypo 
+                name="dots-three-vertical" 
+                size={25} 
+                color="#fff" 
+              />
+            </MenuPopup>
+            :
+            <IconEntypo 
+              name="dots-three-vertical" 
+              size={25} 
+              color="#fff" 
+            />
+        }
+      </MenuContainer>
       {currentTrack
         ?
         (
