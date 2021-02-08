@@ -127,7 +127,10 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
             <MenuPopup 
               songs={songsSelected} 
               navigation={navigation} 
-              onOptionSelected={() => {setIsEditModeActive(false)}}
+              onOptionSelected={() => {
+                setIsEditModeActive(false);
+                setSongsSelected([]);
+              }}
             >
               <IconEntypo 
                 name="dots-three-vertical" 
@@ -236,7 +239,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
                       }
                     })
                   }}
-                  />
+                />
                 </SongSelectedContainer>
               )}
             />

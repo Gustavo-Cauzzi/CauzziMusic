@@ -52,8 +52,8 @@ export const EmptyPlaylistText = styled.Text`
 export const FloatingContainer = styled.View`
   position: absolute;
   z-index: 5;
-  right: 10px;
-  top: 10px;
+  right: 15px;
+  top: 65px;
   width: 40px;
 `;
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import { createDrawerNavigator } from '@react-navigation/drawer';
 import DrawerView from './drawerView';
 import SongList from '../../pages/SongList';
 import AlbumPage from '../../pages/AlbumPage';
@@ -10,6 +9,7 @@ import SearchPage from '../../pages/SearchPage';
 import PlaylistPage from '../../pages/PlaylistPage';
 import PlaylistList from '../../pages/PlaylistList';
 import SongsToFilterPage from '../../pages/SongsToFilterPage';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import FilterConfigurationPage from '../../pages/FilterConfigurationPage';
 
 const Drawer = createDrawerNavigator();

@@ -1,11 +1,11 @@
 import { useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, View, Animated } from 'react-native';
-import { FlatList, RectButton, TouchableNativeFeedback } from 'react-native-gesture-handler';
+import { FlatList, TouchableNativeFeedback } from 'react-native-gesture-handler';
 import IconFontisto from 'react-native-vector-icons/Fontisto';
 import IconAntDesing from 'react-native-vector-icons/AntDesign';
 
-import { ArtistInfo, Container, RandomCoverAlbum, ArtistName, ArtistNameContainer, CurrentAlbumText, EmptyAlbumCover, CoverOverlay, AlbumContainer, AlbumCover, AlbumInfoContainer, AlbumName, SmallEmptyAlbumCover, AlbumNameTicker, NumberOfSongs, RandomAlbumNameTicker, GoBackContainer, BackgroundColor } from './styles';
+import { ArtistInfo, Container, RandomCoverAlbum, ArtistName, ArtistNameContainer, CurrentAlbumText, EmptyAlbumCover, AlbumContainer, AlbumCover, AlbumInfoContainer, AlbumName, SmallEmptyAlbumCover, AlbumNameTicker, NumberOfSongs, RandomAlbumNameTicker, GoBackContainer, BackgroundColor } from './styles';
 
 interface Album {
   album: string | undefined;
@@ -31,7 +31,7 @@ const AnimatedFlatList = Animated.createAnimatedComponent(FlatList as new () => 
 const ArtistPage: React.FC<ArtistPageProps> = ({ navigation }) => {
   const [currentArtist, setCurrentArtist] = useState<Artist>({} as Artist);
   const [currentRandomAlbum, setCurrentRandomAlbum] = useState<Album>({} as Album);
-  const [isGoBackVisible, setIsGoBackVisible] = useState(true);
+  const [] = useState(true);
 
   const animatedGoBackOpacity = useRef(new Animated.Value(0)).current;
   

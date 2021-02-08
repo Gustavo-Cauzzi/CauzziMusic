@@ -62,9 +62,9 @@ interface Artist {
   numberOfSongs: number;
 };
 
-interface UserSettings{
-  ignoreAudios: boolean;
-  hideFilteredSongs: boolean;
+interface EditPlaylistInfo {
+  name?: string;
+  description?: string;
 }
 interface SongContextData {
   TrackPlayer: any & ITrackPlayer;
@@ -85,6 +85,7 @@ interface SongContextData {
   addSongsToPlaylist(songs: MusicFile[], playlistId: string): void;
   addSongsToFilter(songs: MusicFile[]): void;
   removeSongsFromFilter(songs: MusicFile[]): void;
+  editPlaylistInfo(playlistId: string, newInfo: EditPlaylistInfo): void;
   isLoadingAlbumCovers: boolean;
   isShuffleActive: boolean;
   needToRefreshPauseButton: boolean;
@@ -666,6 +667,27 @@ const SongProvider: React.FC = ({ children }) => {
     );
   }, [playlists]);
 
+  const editPlaylistInfo = useCallback((playlistId: string, newInfo: EditPlaylistInfo) => {
+    const playlist = playlists.find(p => p.id == playlistId);
+    if (!playlist){
+      console.log(`editPlaylistInfo: playlist of id ${playlistId} don't exist`);
+      return;
+    }
+    
+    const refreshedPlaylists = playlists.map(p => 
+      p.id == playlistId 
+        ?  {
+          ...p,
+          name: newInfo.name ? newInfo.name : p.name,
+          description: newInfo.description ? newInfo.description : p.description,
+        }
+        : p
+    );
+      
+    setPlaylists(refreshedPlaylists);
+    AsyncStorage.setItem('CauzziMusic:Playlists', JSON.stringify(refreshedPlaylists));
+  }, [playlists]);
+
   const addSongsToFilter = useCallback((songs: MusicFile[]) => {
     let arrayToAdd: MusicFile[] = [];
 
@@ -731,6 +753,7 @@ const SongProvider: React.FC = ({ children }) => {
       removeSongsFromPlaylist,
       addSongsToFilter,
       removeSongsFromFilter,
+      editPlaylistInfo,
       isShuffleActive,
       isLoadingAlbumCovers,
       needToRefreshPauseButton, 

@@ -12,19 +12,21 @@ import MenuPopup from '../../components/MenuPopup';
 import Song from '../../components/Song';
 import { useSongs } from '../../hooks/songs';
 
-import { AlbumContainer, FloatingContainer, Container, InfoContainer, AlbumCover, PlaylistTitle, EmptyPlaylistText, FloatingMenuContainer, SongSelectedContainer, PlaylistInfo, PlaylistDetails } from './styles';
-
-interface MusicFile{
-  id : number,
-  title : string,
-  author : string,
-  album : string,
-  genre : string,
-  duration : number, 
-  cover :string,
-  blur : string,
-  path : string
-}
+import { 
+  AlbumContainer, 
+  FloatingContainer, 
+  Container, 
+  InfoContainer, 
+  AlbumCover, 
+  PlaylistTitle, 
+  EmptyPlaylistText, 
+  FloatingMenuContainer, 
+  SongSelectedContainer, 
+  PlaylistInfo, 
+  PlaylistDetails ,
+} from './styles';
+import { MusicFile } from '../../@types/MusicFile';
+import EditPlaylistModal from '../../components/EditPlaylistModal';
 
 interface MusicFileIndex{
   index: number;
@@ -57,6 +59,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({navigation}) => {
   const [isEditModeActive, setIsEditModeActive] = useState<boolean>(false);
   const [songsSelected, setSongsSelected] = useState<MusicFileIndex[]>([]);
   const [editAnimationCompensation, setEditAnimationCompensation] = useState(false);
+  const [isEditModalActive, setIsEditModalActive] = useState(false);
 
   const animatedXEditContainer = useRef(new Animated.Value(70)).current;
   const animatedFlatlistScrollValue = useRef(new Animated.Value(0)).current;
@@ -140,6 +143,56 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({navigation}) => {
 
   return (
     <Container>
+      <EditPlaylistModal 
+        active={isEditModalActive} 
+        onClose={() => {setIsEditModalActive(false)}}
+        playlist={playlist}
+      />
+      {
+        (isEditModeActive || editAnimationCompensation) &&
+        <FloatingContainer as={Animated.View} 
+          style={[{
+            transform: [
+              {translateX: animatedXEditContainer}, 
+              {translateY: animatedFlatlistScrollValue.interpolate({
+                inputRange: [0, 150],
+                outputRange: [0, -55],
+                extrapolate: 'clamp'
+              })}
+            ]
+          }]}
+        >
+          <FloatingMenuContainer>
+            <MenuPopup 
+              songs={songsSelected} 
+              navigation={navigation} 
+              removeFromPlaylistId={playlist.id} 
+              onOptionSelected={() => {setIsEditModeActive(false)}}
+            >
+              <IconEntypo 
+                name="dots-three-vertical" 
+                size={20} 
+                color="#fff" 
+              />
+            </MenuPopup>
+          </FloatingMenuContainer>
+          <FloatingMenuContainer>
+            <TouchableNativeFeedback 
+              style={{flex: 1, width: 40, alignItems: 'center', justifyContent: 'center'}}
+              onPress={() => {
+                setIsEditModeActive(false);
+                setSongsSelected([]);
+              }}
+            >
+              <IconMaterialCommunityIcons 
+                name="close" 
+                size={25} 
+                color="#fff" 
+              />
+            </TouchableNativeFeedback>
+          </FloatingMenuContainer>
+        </FloatingContainer>
+      }
       <Animated.View 
         style={[
           {position: 'absolute', left: 20, top: 20}, 
@@ -157,34 +210,23 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({navigation}) => {
           />
         </TouchableNativeFeedback>
       </Animated.View>
-      {
-        (isEditModeActive || editAnimationCompensation) &&
-        <FloatingContainer as={Animated.View} style={[{transform: [{translateX: animatedXEditContainer}]}]}>
-          <FloatingMenuContainer>
-            <MenuPopup 
-              songs={songsSelected} 
-              navigation={navigation} 
-              removeFromPlaylistId={playlist.id} 
-              onOptionSelected={() => {setIsEditModeActive(false)}}
-            >
-              <IconEntypo 
-                name="dots-three-vertical" 
-                size={20} 
-                color="#fff" 
-              />
-            </MenuPopup>
-          </FloatingMenuContainer>
-          <FloatingMenuContainer>
-            <TouchableNativeFeedback style={{flex: 1, width: 40, alignItems: 'center', justifyContent: 'center'}}>
-              <IconMaterialCommunityIcons 
-                name="close" 
-                size={25} 
-                color="#fff" 
-              />
-            </TouchableNativeFeedback>
-          </FloatingMenuContainer>
-        </FloatingContainer>
-      }
+      <Animated.View 
+        style={[
+          {position: 'absolute', right: 20, top: 20}, 
+          {opacity: animatedFlatlistScrollValue.interpolate({
+            inputRange: [0, 150],
+            outputRange: [1 , 0]
+          })}
+        ]}
+      >
+        <TouchableNativeFeedback onPress={() => {setIsEditModalActive(true)}}>
+          <IconFeather 
+            name="edit" 
+            size={25} 
+            color="#FFF" 
+          />
+        </TouchableNativeFeedback>
+      </Animated.View>
       <AnimatedFlatList
         data={playlist.songs}
         keyExtractor={(_, i) => String(i)}
@@ -217,7 +259,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({navigation}) => {
               })
             }]}
           >
-            <AlbumContainer>
+            <AlbumContainer as={Animated.View} style={[{transform: [{translateY: animatedFlatlistScrollValue.interpolate({inputRange: [0, 100], outputRange: [0, -10]})}]}]}>
               <View style={{height: 75, width: 150, flexDirection: 'row'}}>
                 <AlbumCover source={playlist.songs[0] == undefined ? NoCoverJpg : {uri: playlist.songs[0].cover}}/>
                 <AlbumCover source={playlist.songs[1] == undefined ? NoCoverJpg : {uri: playlist.songs[1].cover}}/>
@@ -228,12 +270,36 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({navigation}) => {
               </View>
             </AlbumContainer>
             <PlaylistInfo>
-              <PlaylistTitle>
-                {playlist.name}
-              </PlaylistTitle>
-              <PlaylistDetails>
-                {playlist.description}
-              </PlaylistDetails>
+              <Animated.View style={{
+                transform: [{translateY: 
+                  animatedFlatlistScrollValue.interpolate({
+                    inputRange: [0, 100],
+                    outputRange: [0, -15],
+                  })
+                }]
+              }}>
+                <PlaylistTitle>
+                  {playlist.name}
+                </PlaylistTitle>
+              </Animated.View>
+              <Animated.View 
+                style={{
+                  opacity: animatedFlatlistScrollValue.interpolate({
+                    inputRange: [0, 100],
+                    outputRange: [1, 0]
+                  }),
+                  transform: [{
+                    translateY: animatedFlatlistScrollValue.interpolate({
+                      inputRange: [0, 100],
+                      outputRange: [0, -20]
+                    })
+                  }]
+                }}
+              >
+                <PlaylistDetails>
+                  {playlist.description}
+                </PlaylistDetails>
+              </Animated.View>
             </PlaylistInfo>
           </InfoContainer>
         )}
