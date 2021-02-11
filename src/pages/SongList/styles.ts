@@ -16,6 +16,7 @@ export const Header = styled.View`
   width: 100%;
   background-color: #111;
   flex-direction: row;
+  align-items: center;
   justify-content: space-between;
   padding: 10px 15px;
   border-bottom-width: 2px;  
@@ -92,6 +93,18 @@ export const FloatingMenuContainer = styled.View`
   align-items: center;
   border-radius: 10px;
   margin-bottom: 10px;
+`;
+
+export const EmptySongListContainer = styled.View`
+  width: 100%;
+  padding: 20px 0px;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const EmptySongListText = styled.Text`
+  font-family: 'Roboto Slab Regular';
+  color: #fff;
 `;
 
 export const LoadingCoversTest = styled.Text`

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { ArtistContainer, ArtistInfoContainer, ArtistName, ArtistNameTicker, Cover, CoversContainers } from './styles';
+import { ArtistContainer, ArtistInfoContainer, ArtistName, ArtistNameTicker, Cover, CoversContainers, EmptyCover } from './styles';
 
 import NoCoverJpg from '../../../assets/50x50.jpg'
 import { View } from 'react-native';
@@ -33,14 +33,28 @@ const Artist: React.FC<ArtistProps> = ({artist, onPress}) => {
       <CoversContainers>
         {
           numberOfCoversPerArtist.map(i => (
-            <Cover 
-              key={`${artist.artist}${i}`}
-              source={ artist.albums[i] == undefined ? NoCoverJpg : {uri: `${artist.albums[i].cover}`}} 
-              style={{
-                borderTopLeftRadius: i == 0 ? 10 : 0,
-                borderTopRightRadius: i == 3 ? 10 : 0,
-              }}
-            />
+            <>
+              {artist.albums[i] == undefined
+                ? (
+                  <EmptyCover 
+                    key={`${artist.artist}${i}`}
+                    style={{
+                      borderTopLeftRadius: i == 0 ? 10 : 0,
+                      borderTopRightRadius: i == 3 ? 10 : 0,
+                    }}
+                  />
+                ) : (
+                  <Cover 
+                    key={`${artist.artist}${i}`}
+                    source={{uri: `${artist.albums[i].cover}`}} 
+                    style={{
+                      borderTopLeftRadius: i == 0 ? 10 : 0,
+                      borderTopRightRadius: i == 3 ? 10 : 0,
+                    }}
+                  />
+                )
+              }
+            </>
           ))
         }
       </CoversContainers>

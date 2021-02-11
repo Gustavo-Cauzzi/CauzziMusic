@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, View, FlatList, ToastAndroid, TouchableNativeFeedback } from 'react-native';
+import { Animated, View, FlatList, ToastAndroid } from 'react-native';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 
 import IconMaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -26,8 +26,6 @@ import {
 import { useSongs } from '../../hooks/songs';
 import CreatePlaylistModal from '../../components/CreatePlaylistModal';
 import Playlist from '../../components/Playlist';
-import { TouchableHighlight } from 'react-native-gesture-handler';
-import { Easing } from 'react-native-reanimated';
 
 interface DrawerProps {
   navigation?: any;

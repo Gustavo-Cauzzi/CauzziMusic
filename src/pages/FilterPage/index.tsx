@@ -81,7 +81,7 @@ const FilterPage: React.FC<FilterPageProps> = ({ navigation }) => {
         </TitleContainer>
         <DescriptionContainer>
           <Description>
-            O filtro de música serve para você escolher quais músicas não devem tocar quando você estiver ouvindo música. Estas músicas tocaram apenas caso estiverem em um playlist, caso contrário, o Player irá evitar toca-lás.
+            O filtro de música serve para você escolher quais músicas não devem tocar quando você estiver ouvindo música. Estas músicas tocaram apenas caso estiverem em um playlist, caso contrário, o Player irá evitar tocá-las.
           </Description>
         </DescriptionContainer>
       </Header>

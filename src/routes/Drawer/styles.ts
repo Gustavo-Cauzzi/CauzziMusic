@@ -88,6 +88,7 @@ export const Footer = styled.View`
 export const FooterItem = styled(RectButton)`
   margin: 5px 0;
   flex-direction: row;
+  align-items: center;
 `;
 
 export const FooterText = styled.Text`

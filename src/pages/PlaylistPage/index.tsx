@@ -112,7 +112,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({navigation}) => {
         }
       });
     }else{
-      playSong(song);    
+      playSong(song, playlist.songs);    
 
       const {id, title, path, author, cover, duration, album} = song;
       
@@ -126,7 +126,7 @@ const PlaylistPage: React.FC<PlaylistPageProps> = ({navigation}) => {
         album,
       });
     }
-  }, [isEditModeActive]);
+  }, [isEditModeActive, playSong, playlist.songs, navigation]);
 
   const handleSongLongPress = useCallback((song: MusicFile, index: number) => {
     if (!isEditModeActive) setIsEditModeActive(true);

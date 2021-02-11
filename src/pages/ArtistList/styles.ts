@@ -15,6 +15,7 @@ export const Header = styled.View`
   padding: 10px 15px;
   border-bottom-width: 2px;  
   border-bottom-color: #50f; 
+  align-items: center;
   height: 50px;
   width: 100%;
   z-index: 10;

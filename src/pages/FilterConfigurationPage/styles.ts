@@ -9,6 +9,7 @@ export const Header = styled.View`
   background-color: #111;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
   padding: 10px 15px;
   height: 50px;
   z-index: 10;
@@ -22,9 +23,8 @@ export const Title = styled.Text`
 
 export const ConfigurationContainer = styled.View`
   width: 100%;
-  height: 100px;
   align-items: center;
-  padding: 0px 20px;
+  padding: 20px;
   flex-direction: row;
   justify-content: space-between;
 `;

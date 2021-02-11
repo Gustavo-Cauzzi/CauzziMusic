@@ -7,7 +7,6 @@ export const Container = styled.View`
 `;
 
 export const Header = styled.View`
-  height: 200px;
   width: 100%;
 `;
 
@@ -30,6 +29,7 @@ export const Content = styled.View`
 
 export const TitleContainer = styled.View`
   flex-direction: row;
+  align-items: center;
   padding-left: 20px;
   padding-top: 40px;
 `;
@@ -43,12 +43,13 @@ export const Title = styled.Text`
 `;
 
 export const DescriptionContainer = styled.View`
-  flex: 1;
   padding: 10px 30px;
 `;
 
 export const Description = styled.Text`
   text-align: left;
+  flex-shrink: 1;
+  flex-wrap: wrap;
   font-size: 12px;
   color: #777;
   font-family: 'Karla Regular';

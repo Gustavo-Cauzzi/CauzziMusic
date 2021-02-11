@@ -17,6 +17,7 @@ export const CoversContainers = styled.View`
   flex-direction: row;
 `;
 
+
 export const ArtistName = styled.Text`
   color: #e5e5e5;
   font-family: 'Roboto Slab Regular';
@@ -30,6 +31,12 @@ export const ArtistNameTicker = styled(TextTicker)`
 export const Cover = styled.Image`
   height: 83px;
   width: 83px;
+`
+
+export const EmptyCover = styled.View`
+  height: 83px;
+  width: 83px;
+  background-color: #222;
 `
 
 export const ArtistInfoContainer = styled.View`

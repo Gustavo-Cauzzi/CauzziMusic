@@ -20,6 +20,8 @@ import {
   FloatingEditContainer,
   FloatingMenuContainer,
   LoadingCoversTest,
+  EmptySongListContainer,
+  EmptySongListText,
 } from './styles';
 import Song from '../../components/Song';
 import { useSongs } from '../../hooks/songs';
@@ -54,7 +56,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
   const {
     songList,
     playSong,
-    changeShuffleValue,
+    setIsShuffleActive,
     setNeedToRefreshShuffleButton,
     isLoadingAlbumCovers,
     hideFilteredSongs,
@@ -98,7 +100,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
     if (isEditModeActive) return;
     const randomIndex = Math.floor(Math.random() * songList.length);
     playSong(songList[randomIndex]);
-    changeShuffleValue(true);
+    setIsShuffleActive(true);
     setNeedToRefreshShuffleButton(true);
 
     const {id, title, path, author, cover, duration, album} = songList[randomIndex];
@@ -167,7 +169,7 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
         {transform: [{translateY: Animated.add(animatedLoadingMarginTop,animatedScroll)}]} 
       ]}>
         <LoadingCoversTest>
-          Carregando covers...
+          {songList.length == 0 ? 'Procurando Músicas...' : 'Carregando covers...'}
         </LoadingCoversTest>
       </Animated.View>
       <Content>
@@ -182,17 +184,26 @@ const SongList: React.FC<SongListProps> = ({ navigation }) => {
               [{nativeEvent: {contentOffset: {y: scroll}}}],
               {useNativeDriver: true},
             )}
+            ListEmptyComponent={() => (
+              <EmptySongListContainer>
+                <EmptySongListText>
+                  Você não possui nenhuma música em seu dispositivo 😢
+                </EmptySongListText>
+              </EmptySongListContainer>
+            )}
             ListHeaderComponent={() => (
               <>
                 <View style={styles.animatedHeaderCompensation}/>
-                <ShuffleContainer>
-                  <ShuffleButton onPress={handleIniciateShufflePlaylist}>
-                    <ShuffleIconContainer>
-                      <IconIonicons name="shuffle" size={23} color="#fff"/>
-                    </ShuffleIconContainer>
-                    <ShuffleText>Aleatório</ShuffleText>
-                  </ShuffleButton>
-                </ShuffleContainer>
+                { songList.length !== 0 &&
+                  <ShuffleContainer>
+                    <ShuffleButton onPress={handleIniciateShufflePlaylist}>
+                      <ShuffleIconContainer>
+                        <IconIonicons name="shuffle" size={23} color="#fff"/>
+                      </ShuffleIconContainer>
+                      <ShuffleText>Aleatório</ShuffleText>
+                    </ShuffleButton>
+                  </ShuffleContainer>
+                }
               </>
             )}
             renderItem={({item: song}) => (

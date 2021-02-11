@@ -1,13 +1,9 @@
 import { Dimensions } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import TextTicker from 'react-native-text-ticker';
-import styled, { css } from 'styled-components/native';
+import styled from 'styled-components/native';
 
 const screenWidth = Dimensions.get('window').width;
-
-interface GoBackContainerProps {
-  isVisible: boolean;
-}
 
 export const Container = styled.View`
   background-color: #000;
